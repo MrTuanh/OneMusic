@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -35,16 +36,14 @@ import static teamthat.com.onemusic.activity.LoginActivity.LOGIN_API;
  */
 
 public class ArtistMusicActivity extends AppCompatActivity {
-
-    public final String GET_MUSIC_ARTIST_API = "http://nghiahoang.net/api/appmusic/?function=songofartist";
-
+     public final String GET_MUSIC_ARTIST_API = "http://nghiahoang.net/api/appmusic/?function=songofartist";
     ImageView imgArtist;
     ListView lvMusic;
    static ArrayList<ArtistMusic> listMusic;
+  static ArtistMusic artistMusic;
     ArrayAdapter adapter;
-    static int index;
     static int max;
-
+    static int index;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,7 +94,7 @@ public class ArtistMusicActivity extends AppCompatActivity {
                     listMusic.add(music);
 
                 }
-                max = listMusic.size();
+                max = listMusic.size()-1;
                 adapter.notifyDataSetChanged();
 
             }catch (JSONException e){
@@ -172,12 +171,29 @@ public class ArtistMusicActivity extends AppCompatActivity {
         lvMusic.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Constant.path =LoginActivity.LOGIN_API+listMusic.get(i).getMusicPath();
+
+                index =i;
+                Constant.name = listMusic.get(i).getNameMusic();
+                artistMusic = listMusic.get(i);
                 Intent intent = new Intent(getApplicationContext(), PlayerActivity.class);
-                index = i;
-                intent.putExtra("position",i);
                 startActivity(intent);
             }
         });
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == android.R.id.home) {
+            // finish the activity
+            onBackPressed();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+  
 }

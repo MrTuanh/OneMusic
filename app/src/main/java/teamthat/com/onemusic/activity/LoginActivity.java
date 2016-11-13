@@ -35,13 +35,18 @@ public class LoginActivity extends AppCompatActivity {
     EditText edtEmail, edtPassword;
     Button btnLogin;
     TextView tvSinup;
+    ProgressDialog progressDialog;
+
     public static final String LOGIN_API = "http://nghiahoang.net/api/appmusic/";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         addControl();
-
+        progressDialog = new ProgressDialog(LoginActivity.this,
+                R.style.AppTheme_Dark_Dialog);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setMessage("Loading...");
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -73,23 +78,9 @@ public class LoginActivity extends AppCompatActivity {
             onLoginFailed();
             return;
         }
-
         btnLogin.setEnabled(false);
-
-        final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this,
-                R.style.AppTheme_Dark_Dialog);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Loading...");
-        progressDialog.show();
-
-        new android.os.Handler().postDelayed(
-                new Runnable() {
-                    public void run() {
-                        onLoginSuccess();
-                        progressDialog.dismiss();
-                    }
-                }, 2000);
-    }
+        onLoginSuccess();
+}
 
     public void onLoginSuccess() {
         new connectToServer().execute();
@@ -172,8 +163,11 @@ public class LoginActivity extends AppCompatActivity {
                         String Gender = userInfor.optString("gender");
                         String Level = userInfor.optString("level");
                         Log.d("mydebug","dn than cong "+Name);
-                        SplashActivity.user = new User(UserId,Name,UserName,Password,Birthday,Address,Gender,Phone,Level,Email,Vip,Image);
+                        SplashActivity.user = new User(getApplicationContext());
+                        SplashActivity.user.createSession(UserId,Name,UserName,Password,Birthday,Address,Gender,Phone,Level,Email,Vip,Image);
+                      //  SplashActivity.user = new User(getApplicationContext(),UserId,Name,UserName,Password,Birthday,Address,Gender,Phone,Level,Email,Vip,Image);
                         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                        Log.d("mydebug","json image "+SplashActivity.user.getImage());
                         startActivityForResult(intent,1);
 
 
@@ -250,6 +244,7 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            progressDialog.show();
         }
 
         @Override
@@ -257,6 +252,7 @@ public class LoginActivity extends AppCompatActivity {
 
             super.onPostExecute(aVoid);
             parseJsonResponse(aVoid);
+            progressDialog.dismiss();
             Log.d("mydebug",aVoid);
         }
 

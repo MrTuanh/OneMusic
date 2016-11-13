@@ -66,22 +66,14 @@
             android:name=".activity.SignupActivity"
             android:theme="@style/AppTheme.Dark" />
         <activity android:name=".activity.ArtistMusicActivity" />
-        <activity android:name=".activity.PlayerActivity" />
+        <activity android:name=".activity.PlayerActivity"
+            android:launchMode="singleTop"
+            />
         <activity
             android:name=".activity.AboutUsActivity"
             android:label="@string/activity_title_about_us" />
 
-        <service android:name=".Service.BoundService" />
-
-        <receiver
-            android:name=".receiver.MyReceiver"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="sendMaxTime" />
-                />
-            </intent-filter>
-        </receiver>
+        <service android:name=".activity.BoundService" />
 
     </application>
 

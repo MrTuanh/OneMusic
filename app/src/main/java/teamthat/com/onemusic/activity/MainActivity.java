@@ -12,6 +12,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,11 +24,11 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import teamthat.com.onemusic.R;
-import teamthat.com.onemusic.fragment.ArtistFragment;
 import teamthat.com.onemusic.fragment.HomeFragment;
 import teamthat.com.onemusic.fragment.MusicHotFragment;
 import teamthat.com.onemusic.fragment.MusicRankFragment;
 import teamthat.com.onemusic.fragment.SettingsFragment;
+import teamthat.com.onemusic.model.User;
 import teamthat.com.onemusic.other.CircleTransform;
 
 
@@ -40,7 +41,6 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     private TextView txtName, txtWebsite;
     private Toolbar toolbar;
     private SearchView searchView;
-
 
     // urls to load navigation header background image
     // and profile image
@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         setContentView(R.layout.activity_main);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        SplashActivity.user = new User();
         mHandler = new Handler();
 
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -106,9 +106,19 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
     private void loadNavHeader() {
         // name, email
+try {
+    if (SplashActivity.user == null) {
+        SplashActivity.user = new User(this);
+    }
 
-            txtName.setText(SplashActivity.user.getName());
-            txtWebsite.setText(SplashActivity.user.getEmail());
+    txtName.setText(SplashActivity.user.getName());
+    Log.d("mydebug", "json image " + SplashActivity.user.getImage());
+    txtWebsite.setText(SplashActivity.user.getEmail());
+
+}catch (NullPointerException e){
+
+}
+
 
 
 
@@ -119,12 +129,16 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                 .into(imgNavHeaderBg);
 
         // Loading profile image
-        Glide.with(this).load(LoginActivity.LOGIN_API+SplashActivity.user.getImage())
-                .crossFade()
-                .thumbnail(0.5f)
-                .bitmapTransform(new CircleTransform(this))
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .into(imgProfile);
+        try {
+            Glide.with(this).load(LoginActivity.LOGIN_API + SplashActivity.user.getImage())
+                    .crossFade()
+                    .thumbnail(0.5f)
+                    .bitmapTransform(new CircleTransform(this))
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(imgProfile);
+        }catch(NullPointerException e){
+            Log.d("mydebug", "user null");
+        }
 
         // showing dot next to notifications label
         //navigationView.getMenu().getItem(3).setActionView(R.layout.menu_dot);
@@ -172,7 +186,6 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         // refresh toolbar menu
         invalidateOptionsMenu();
     }
-
     private Fragment getHomeFragment() {
         switch (navItemIndex) {
             case 0:

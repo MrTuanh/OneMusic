@@ -1,5 +1,9 @@
 package teamthat.com.onemusic.model;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+
 /**
  * Created by ASUS on 11/1/2016.
  */
@@ -16,11 +20,14 @@ public class User {
     String email;
     String vip;
     String image;
-
+    private SharedPreferences prefs;
+    SharedPreferences.Editor editor;
     public User() {
     }
 
-    public User(String id, String name, String username, String password, String birthday, String address, String gender, String phone, String level, String email, String vip, String image) {
+    public User(Context context,String id, String name, String username, String password, String birthday, String address, String gender, String phone, String level, String email, String vip, String image) {
+        prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        editor = prefs.edit();
         this.id = id;
         this.name = name;
         this.username = username;
@@ -33,18 +40,56 @@ public class User {
         this.email = email;
         this.vip = vip;
         this.image = image;
+        editor.putString("userid",id);
+        editor.putString("username",username);
+        editor.putString("name",name);
+        editor.putString("password",password);
+        editor.putString("birthday",birthday);
+        editor.putString("address",address);
+        editor.putString("gender",gender);
+        editor.putString("phone",phone);
+        editor.putString("level",level);
+        editor.putString("email",email);
+        editor.putString("vip",vip);
+        editor.putString("image",image);
+        editor.commit();
+    }
+    public void createSession(String id, String name, String username, String password, String birthday, String address, String gender, String phone, String level, String email, String vip, String image) {
+
+        editor.putString("userid",id);
+        editor.putString("username",username);
+        editor.putString("name",name);
+        editor.putString("password",password);
+        editor.putString("birthday",birthday);
+        editor.putString("address",address);
+        editor.putString("gender",gender);
+        editor.putString("phone",phone);
+        editor.putString("level",level);
+        editor.putString("email",email);
+        editor.putString("vip",vip);
+        editor.putString("image",image);
+        editor.commit();
+    }
+
+    public User(Context context){
+        prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        editor = prefs.edit();
+
     }
 
     public String getId() {
-        return id;
+
+        return prefs.getString("userid",null);
     }
 
     public void setId(String id) {
         this.id = id;
+        editor.putString("userid",id);
+        editor.commit();
     }
 
     public String getName() {
-        return name;
+        return prefs.getString("name",null);
     }
 
     public void setName(String name) {
@@ -52,7 +97,7 @@ public class User {
     }
 
     public String getUsername() {
-        return username;
+        return prefs.getString("username",null);
     }
 
     public void setUsername(String username) {
@@ -60,7 +105,7 @@ public class User {
     }
 
     public String getPassword() {
-        return password;
+        return prefs.getString("password",null);
     }
 
     public void setPassword(String password) {
@@ -68,7 +113,7 @@ public class User {
     }
 
     public String getBirthday() {
-        return birthday;
+        return prefs.getString("birthday",null);
     }
 
     public void setBirthday(String birthday) {
@@ -76,7 +121,7 @@ public class User {
     }
 
     public String getAddress() {
-        return address;
+        return prefs.getString("address",null);
     }
 
     public void setAddress(String address) {
@@ -84,7 +129,7 @@ public class User {
     }
 
     public String getGender() {
-        return gender;
+        return prefs.getString("gender",null);
     }
 
     public void setGender(String gender) {
@@ -92,7 +137,7 @@ public class User {
     }
 
     public String getPhone() {
-        return phone;
+        return prefs.getString("phone",null);
     }
 
     public void setPhone(String phone) {
@@ -100,7 +145,7 @@ public class User {
     }
 
     public String getLevel() {
-        return level;
+        return prefs.getString("level",null);
     }
 
     public void setLevel(String level) {
@@ -108,7 +153,7 @@ public class User {
     }
 
     public String getEmail() {
-        return email;
+        return prefs.getString("email",null);
     }
 
     public void setEmail(String email) {
@@ -116,7 +161,7 @@ public class User {
     }
 
     public String getVip() {
-        return vip;
+        return prefs.getString("vip",null);
     }
 
     public void setVip(String vip) {
@@ -124,7 +169,7 @@ public class User {
     }
 
     public String getImage() {
-        return image;
+        return prefs.getString("image",null);
     }
 
     public void setImage(String image) {

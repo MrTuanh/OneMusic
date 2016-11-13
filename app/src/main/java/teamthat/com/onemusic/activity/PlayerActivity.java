@@ -2,80 +2,92 @@ package teamthat.com.onemusic.activity;
 
 import android.app.ActivityManager;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import com.squareup.picasso.Picasso;
+
+import java.io.IOException;
 
 import teamthat.com.onemusic.R;
-import teamthat.com.onemusic.Service.BoundService;
 import teamthat.com.onemusic.model.ArtistMusic;
 
 /**
  * Created by thietit on 11/2/2016.
  */
 
-public class PlayerActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener {
-
+public class PlayerActivity extends AppCompatActivity {
+               int i,j=0;
     ImageButton ibPlay, ibPrevious, ibNext, ibFavourite, ibDowload;
   static  SeekBar seekBar;
    static TextView tvMinTime,tvMaxTime;
+    int k =0;
+    static int index;
+    int max;
     ArtistMusic song;
+    final int HOUR = 60*60*1000;
+    final int MINUTE = 60*1000;
+    final int SECOND = 1000;
+
     boolean isPlayed = false;
     String path;
     Intent intent;
     BoundService boundService;
     Bundle bundle;
-    int k =0;
-    int index;
-    long currentTime;
-    int max;
+    ImageView image;
+      public static final String ACTION_PLAY = "com.example.action.PLAY";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
         addCtrols();
+        Picasso.with(this) //Context
+                .load(LoginActivity.LOGIN_API+ArtistFragment.artist.getImage()) //URL/FILE
+                .into(image);//an ImageView Object to show the loaded image;
+
         clickImgButton();
-        ibPlay.setMaxWidth(16);
         index = ArtistMusicActivity.index;
-              max = ArtistMusicActivity.max;
-      intent = getIntent();
-        int position = intent.getIntExtra("position",0);
-        song = ArtistMusicActivity.listMusic.get(position);
-        Log.d("mydebug","duong dan bai hat "+song.getMusicPath());
+        max = ArtistMusicActivity.max-1;
         boundService = new BoundService();
-         path = song.getMusicPath();
         intent = new Intent(PlayerActivity.this,BoundService.class);
-         bundle = new Bundle();
-        bundle.putString("path",path);
-        intent.putExtra("bundle",bundle);
-        if(isServiceRunning()){
+        intent.setAction(ACTION_PLAY);
+        ibPlay.setImageResource(R.drawable.ic_pause);
+
+        getSupportActionBar().setTitle(Constant.name);
+        // nếu chưa có service chạy, thì khởi tạo service
+        if(!isServiceRunning()){
+             startService(intent);
+        }else{
             stopService(intent);
-        }
-        if(!isPlayed){
-            ibPlay.setImageResource(R.drawable.ic_pause);
-            bundle.putString("path",path);
-            bundle.putInt("position",0);
-            intent.putExtra("bundle",bundle);
             startService(intent);
-            isPlayed=true;
         }
-        setMaxseekbar();
-seekBar.setOnSeekBarChangeListener(this);
 
-
-
-    }
-    public void setCurrentTime(long time){
-        this.currentTime=time;
-    }
-        public long getCurrentTime(){
-            return this.currentTime;
+        if(BoundService.mediaPlayer!=null){
+            setMaxTime(BoundService.mediaPlayer.getDuration());
+            Log.d("mydebug","duration "+BoundService.mediaPlayer.getDuration());
         }
+        seekBar.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+              if(event.getAction()==MotionEvent.ACTION_MOVE){
+                  seekBar.setProgress(seekBar.getProgress());
+
+              }
+                return false;
+            }
+        });
+     }
+
         public void addCtrols() {
             ibPlay = (ImageButton) findViewById(R.id.ib_play);
             ibPrevious = (ImageButton) findViewById(R.id.ib_previous);
@@ -85,20 +97,7 @@ seekBar.setOnSeekBarChangeListener(this);
             seekBar = (SeekBar) findViewById(R.id.seekBar);
             tvMaxTime = (TextView) findViewById(R.id.tv_end);
             tvMinTime = (TextView) findViewById(R.id.tv_start);
-        }
-        public void setDuration(String duration){
-            tvMaxTime.setText(duration);}
-        public void setPosition(String time){
-            tvMinTime.setText(time);
-        }
-        public void setMaxSeekBar(int time){
-            seekBar.setMax(time);
-        }
-    public void setMaxseekbar(){
-        seekBar.setMax((int)boundService.getDuration());
-    }
-        public void updateSeekBar(int time){
-           seekBar.setProgress(time);
+            image = (ImageView) findViewById(R.id.iv);
         }
 
     public void clickImgButton() {
@@ -106,123 +105,67 @@ seekBar.setOnSeekBarChangeListener(this);
             @Override
             public void onClick(View view) {
                 if(isPlayed){
-                    Toast.makeText(getBaseContext(), "Pause", Toast.LENGTH_LONG).show();
-                   // ibPlay.setBackgroundResource(R.drawable.ic_play);
-                    ibPlay.setImageResource(R.drawable.ic_play);
-                    Log.d("mydebug",getCurrentTime()+" time stop");
-
-                    Intent intent1 = new Intent();
-                    intent1.setAction("pause");
-
-                    sendBroadcast(intent1);
-                 //  stopService(intent);
-                    isPlayed=false;
-                }else{
-                  //  ibPlay.setBackgroundResource(R.drawable.ic_pause);
-                    Toast.makeText(getBaseContext(), "Play", Toast.LENGTH_LONG).show();
+                    i++;
                     ibPlay.setImageResource(R.drawable.ic_pause);
-                    Log.d("mydebug",getCurrentTime()+" time restart");
-                    Intent intent1 = new Intent();
-                    intent1.setAction("replay");
+                        Log.d("mydebug","play "+i);
+                      BoundService.mediaPlayer.start();
+                        isPlayed=false;
+                }else{
+                    j++;
 
-                    sendBroadcast(intent1);
-//                    bundle.putString("path",path);
-//                    bundle.putInt("position",1);
-//                    intent.putExtra("bundle",bundle);
-//                    startService(intent);
+                      ibPlay.setImageResource(R.drawable.ic_play);
+                     Log.d("mydebug","pause "+j);
+                      BoundService.mediaPlayer.pause();
+
                     isPlayed=true;
                 }
-
-
-
-            }
+             }
         });
 
         ibPrevious.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(getBaseContext(), "Previous", Toast.LENGTH_LONG).show();
 
-                int next;
-                if(index==0){
-                    k+=1;
-                    next = max-k;
+                ibPlay.setImageResource(R.drawable.ic_pause);
+                int k = getIndexOfMusic(0,-1);
 
-
-                }else{
-                    k+=1;
-                    next = index-k;
-                    if(next ==0){
-                        next = max-1;
-                        k=0;
-                    }
-                }
-                Log.d("mydebug","index "+index+"max "+max);
-                Log.d("mydebug","next "+next);
-                ArtistMusic song1 = ArtistMusicActivity.listMusic.get(next);
-                String path = song1.getMusicPath();
-                Log.d("mydebug","path "+path);
+                Constant.path =LoginActivity.LOGIN_API+ArtistMusicActivity.listMusic.get(k).getMusicPath();
+                   Constant.name = ArtistMusicActivity.listMusic.get(k).getNameMusic();
+                getSupportActionBar().setTitle(Constant.name);
+                Log.d("mydebug","previous "+k+" = "+Constant.path);
                 if(isServiceRunning()){
                     stopService(intent);
+
                 }
-
-                    ibPlay.setImageResource(R.drawable.ic_pause);
-                    bundle.putString("path",path);
-
-                    intent.putExtra("bundle",bundle);
-                    startService(intent);
-                    isPlayed=true;
-
-
-
-            }
-        });
+                startService(intent);
+              //  new openService().execute();
+                    isPlayed=false;
+                 }
+             });
 
         ibNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(getBaseContext(), "Next", Toast.LENGTH_LONG).show();
-                int next;
-
-
-                if(index==(max-1)){
-                    k+=1;
-                    next=k;
-                    if(next == (max-1)){
-                        k=0;
-                        next=k;
-                        k+=1;
-                    }
-
-                }else{
-                    k+=1;
-                    next = index+k;
-
-                }
-                Log.d("mydebug","index "+index+"max "+max);
-                Log.d("mydebug","next "+next);
-                ArtistMusic song1 = ArtistMusicActivity.listMusic.get(next);
-                String path = song1.getMusicPath();
-                Log.d("mydebug","path "+path);
-                if(isServiceRunning()){
-                    stopService(intent);
-                }
-
                 ibPlay.setImageResource(R.drawable.ic_pause);
-                bundle.putString("path",path);
 
-                intent.putExtra("bundle",bundle);
-                startService(intent);
-                isPlayed=true;
+            int k = getIndexOfMusic(1,1);
+            Constant.path =LoginActivity.LOGIN_API+ArtistMusicActivity.listMusic.get(k).getMusicPath();
+                  Constant.name = ArtistMusicActivity.listMusic.get(k).getNameMusic();
+                getSupportActionBar().setTitle(Constant.name);
+               Log.d("mydebug","next "+k+" = "+Constant.path);
+                isPlayed=false;
+                        if(isServiceRunning()){
+                                    stopService(intent);
+                           }
+                   startService(intent);
 
-
-            }
+             }
         });
 
         ibFavourite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(getBaseContext(), "Favourite", Toast.LENGTH_LONG).show();
+
 
             }
         });
@@ -230,15 +173,43 @@ seekBar.setOnSeekBarChangeListener(this);
         ibDowload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(getBaseContext(), "Dowload", Toast.LENGTH_LONG).show();
+
             }
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+         if(item.getItemId()==android.R.id.home) {
+            finish();
+        }
+        return super.onOptionsItemSelected(item);
+
+    }
+
+    public int MyStart() throws IOException {
+        Log.d("process1","Main Activity MyStart");
+        try{
+
+        }catch (IllegalStateException e){
+
+        }
+        return 0;
+
+    }
+
+
     private boolean isServiceRunning() {
         ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)){
-            if("teamthat.com.onemusic.Service.BoundService".equals(service.service.getClassName())) {
+            if("teamthat.com.onemusic.activity.BoundService".equals(service.service.getClassName())) {
+                Log.d("process1","ten service "+service.service.getClassName());
                 return true;
             }
         }
@@ -246,32 +217,164 @@ seekBar.setOnSeekBarChangeListener(this);
     }
 
     @Override
-    public void onProgressChanged(SeekBar seekBar1, int i, boolean b) {
-        if(b) { // Event is triggered only if the seekbar position was modified by the user
-            if(seekBar1.equals(seekBar)) {
-                //boundService.seekTo(i);
-                Log.d("mydebug","seekTo "+i);
-                //Toast.makeText(getApplicationContext(),i,Toast.LENGTH_LONG).show();
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
 
-                Intent intent = new Intent();
-                intent.setAction("updateSeekbar");
+    }
+    public class openService extends AsyncTask<Void,Integer,Integer>{
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
 
-                sendBroadcast(intent);
-
-
-
+            try {
+                Log.d("process1","Main Activity Pre "+MyStart());
+                setMaxTime(MyStart());
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-           // updatePosition();
+
+        }
+
+        @Override
+        protected Integer doInBackground(Void... params) {
+            Log.d("process1","Main Activity vao doInBackgroud");
+            boolean t = true;
+
+                 try{
+                while(t){
+
+                    Thread.sleep(1000);
+                }
+
+            }catch (IllegalStateException e){
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+            SetProgress(values[0]);
+        }
+
+        @Override
+        protected void onPostExecute(Integer aVoid) {
+            super.onPostExecute(aVoid);
+
         }
     }
 
-    @Override
-    public void onStartTrackingTouch(SeekBar seekBar) {
+    public class startService extends AsyncTask<Void,Void,Void>{
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            startService(intent);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            new openService().execute();
+        }
+    }
+
+    public class stopMusic extends AsyncTask<Void,Void,Void>{
+
+        @Override
+        protected Void doInBackground(Void... params){
+
+            stopService(intent);
+            startService(intent);
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            new openService().execute();
+        }
+    }
+    public void setMaxTime(long duration){
+        Log.d("process1","max time "+setTimeFormat(duration));
+       seekBar.setMax((int)duration);
+       tvMaxTime.setText(setTimeFormat(duration));
+    }
+    public String setTimeFormat(long time) {
+        final int HOUR = 60 * 60 * 1000;
+        final int MINUTE = 60 * 1000;
+        final int SECOND = 1000;
+        final long hour = time / HOUR;
+        final long _hour = time % HOUR;
+        final long minute = _hour / MINUTE;
+        final long _minute = _hour % MINUTE;
+        final long second = _minute / SECOND;
+        String result ="";
+        String mi = "";
+        String se = "";
+        String ho = "";
+        if (hour == 0) {
+            if (minute < 10) {
+                mi = "0" + minute;
+
+            } else {
+                mi = minute + "";
+
+
+            }
+            if (second < 10) {
+                se = "0" + second;
+            } else {
+                se = second + "";
+            }
+            result =(mi + ":" + se);
+
+        } else {
+            if (minute < 10) {
+                mi = "0" + minute;
+
+
+            } else {
+
+                mi = minute + "";
+
+
+            }
+            if (second < 10) {
+                se = "0" + second;
+            } else {
+                se = second + "";
+            }
+            if (hour < 10) {
+                ho = "0" + hour;
+            } else {
+                ho = hour + "";
+            }
+            result=(ho + ":" + mi + ":" + se);
+        }
+        return result;
+    }
+    public void SetProgress(long time){
+        Log.d("process1","progress time "+setTimeFormat(time));
+        seekBar.setProgress((int)time);
+        tvMinTime.setText(setTimeFormat(time));
+    }
+    public int getIndexOfMusic(int k,int i){
+
+        if(index == max&k==1){
+            index =0;
+        }else if(index ==0&k==0){
+            index = max;
+        }else{
+            index +=i;
+        }
+        return index;
 
     }
 
-    @Override
-    public void onStopTrackingTouch(SeekBar seekBar) {
-
-    }
 }

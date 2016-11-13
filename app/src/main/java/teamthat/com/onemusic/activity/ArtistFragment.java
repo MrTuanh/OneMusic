@@ -1,5 +1,6 @@
-package teamthat.com.onemusic.fragment;
+package teamthat.com.onemusic.activity;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -30,7 +31,6 @@ import java.net.URL;
 import java.util.ArrayList;
 
 import teamthat.com.onemusic.R;
-import teamthat.com.onemusic.activity.ArtistMusicActivity;
 import teamthat.com.onemusic.adapter.ArtistBaseAdapter;
 import teamthat.com.onemusic.model.Artist;
 
@@ -49,9 +49,13 @@ public class ArtistFragment extends Fragment {
     public final String GET_ALL_ARTIST_API = "http://nghiahoang.net/api/appmusic/?function=getallartist";
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    static Artist artist= null;
+
     GridView gvArtist;
-    ArrayList<Artist> listartist;
+   static ArrayList<Artist> listartist;
     ArrayAdapter adapter;
+    ArtistBaseAdapter artistAdapter;
+    ProgressDialog dialog;
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
@@ -83,6 +87,7 @@ public class ArtistFragment extends Fragment {
         final ConnectivityManager connectivityManager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         final NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
         if(networkInfo !=null){
+
             new getAllArtist().execute(GET_ALL_ARTIST_API);
         }else{
             Toast.makeText(getActivity().getApplicationContext(),"Khong co ket noi mang",Toast.LENGTH_SHORT).show();
@@ -90,6 +95,7 @@ public class ArtistFragment extends Fragment {
 
 
         }
+
 
     }
 
@@ -104,6 +110,8 @@ public class ArtistFragment extends Fragment {
         View rootview = inflater.inflate(R.layout.fragment_artist, container, false);
         gvArtist = (GridView) rootview.findViewById(R.id.gvArtist);
         listartist =  new ArrayList<>();
+       artistAdapter = new ArtistBaseAdapter(getActivity(), R.layout.item_artist, listartist);
+        gvArtist.setAdapter(artistAdapter);
         goToArtist();
 
 
@@ -115,13 +123,14 @@ public class ArtistFragment extends Fragment {
     gvArtist.setOnItemClickListener(new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-            Toast.makeText(getActivity(), listartist.get(position).getName(), Toast.LENGTH_LONG).show();
+           // Toast.makeText(getActivity(), listartist.get(position).getName(), Toast.LENGTH_LONG).show();
             Intent intent = new Intent(getActivity(), ArtistMusicActivity.class);
             Bundle bundle = new Bundle();
             bundle.putString("image",listartist.get(position).getImage());
             bundle.putString("id",listartist.get(position).getId());
             bundle.putString("name",listartist.get(position).getName());
             intent.putExtra("bundle",bundle);
+           artist = listartist.get(position);
             startActivity(intent);
         }
     });
@@ -143,6 +152,8 @@ public class ArtistFragment extends Fragment {
 //            throw new RuntimeException(context.toString()
 //                    + " must implement OnFragmentInteractionListener");
 //        }
+       dialog = ProgressDialog.show(context, "",
+                "Loading. Please wait...", true);
     }
 
     @Override
@@ -155,7 +166,7 @@ public class ArtistFragment extends Fragment {
         void onFragmentInteraction(Uri uri);
     }
     // Connecto To Server
-    public class getAllArtist extends AsyncTask<String,String,String> {
+    public class getAllArtist extends AsyncTask<String,Artist,String> {
         public void parseJsonResponse(String json){
             try{
 
@@ -181,6 +192,13 @@ public class ArtistFragment extends Fragment {
 
             }
         }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            dialog.show();
+        }
+
         @Override
         protected String doInBackground(String... params) {
             HttpURLConnection urlConnection = null;
@@ -233,14 +251,49 @@ public class ArtistFragment extends Fragment {
                 }
             }
 
-            return forecastJsonStr;
+            //--------------------------------------
+            Log.d("mydebug","vao day");
+            try{
+
+                JSONArray array = new JSONArray(forecastJsonStr);
+
+                for(int i=0; i< array.length();i++ ){
+                    JSONObject cm = array.optJSONObject(i);
+                    String artistId = cm.optString("ArtistId");
+                    String artistName = cm.optString("ArtistName");
+                    String image = cm.getString("Image");
+                    String des = cm.getString("Description");
+                    String love = cm.getString("Love");
+                    Log.d("mydebug",artistName);
+                    Artist artist = new Artist(artistId,artistName,image,love,des);
+
+                    publishProgress(artist);
+
+                }
+
+
+
+            }catch (JSONException e){
+                e.printStackTrace();
+
+            }
+            //--------------------------------------
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Artist... values) {
+            super.onProgressUpdate(values);
+            listartist.add(values[0]);
+            artistAdapter.notifyDataSetChanged();
         }
 
         @Override
         protected void onPostExecute(String json) {
             super.onPostExecute(json);
-            Log.d("mydebug",json);
-            parseJsonResponse(json);
+            dialog.dismiss();
+           // Log.d("mydebug",json);
+
         }
     }
 }
