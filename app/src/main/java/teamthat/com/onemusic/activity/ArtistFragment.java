@@ -56,6 +56,8 @@ public class ArtistFragment extends Fragment {
     ArrayAdapter adapter;
     ArtistBaseAdapter artistAdapter;
     ProgressDialog dialog;
+    getAllArtist mygetallartist;
+
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
@@ -80,6 +82,7 @@ public class ArtistFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+      mygetallartist = new getAllArtist();
 //        if (getArguments() != null) {
 //            mParam1 = getArguments().getString(ARG_PARAM1);
 //            mParam2 = getArguments().getString(ARG_PARAM2);
@@ -88,7 +91,7 @@ public class ArtistFragment extends Fragment {
         final NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
         if(networkInfo !=null){
 
-            new getAllArtist().execute(GET_ALL_ARTIST_API);
+           mygetallartist.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,GET_ALL_ARTIST_API);
         }else{
             Toast.makeText(getActivity().getApplicationContext(),"Khong co ket noi mang",Toast.LENGTH_SHORT).show();
 
@@ -196,11 +199,13 @@ public class ArtistFragment extends Fragment {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            Log.d("mydebug","bat dau vao tai");
             dialog.show();
         }
 
         @Override
         protected String doInBackground(String... params) {
+            Log.d("mydebug","vào background");
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
 
@@ -209,7 +214,7 @@ public class ArtistFragment extends Fragment {
 
             try {
                 URL url = new URL(params[0]);
-
+                Log.d("mydebug","url "+url);
                 // Create the request to OpenWeatherMap, and open the connection
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
@@ -234,7 +239,7 @@ public class ArtistFragment extends Fragment {
                     return null;
                 }
                 forecastJsonStr = buffer.toString();
-                Log.d("mydebug",forecastJsonStr);
+                Log.d("mydebug","json la "+ forecastJsonStr);
             } catch (IOException e) {
                 Log.e("PlaceholderFragment", "Error ", e);
                 return null;
@@ -295,5 +300,11 @@ public class ArtistFragment extends Fragment {
            // Log.d("mydebug",json);
 
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mygetallartist.cancel(true);
     }
 }
