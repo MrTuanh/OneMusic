@@ -1,5 +1,6 @@
 package teamthat.com.onemusic.activity;
 
+import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -11,6 +12,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -175,14 +177,22 @@ public class BoundService extends Service implements MediaPlayer.OnPreparedListe
 
 
     }
+
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+
     public void startForeground() {
         manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         Intent intent = new Intent(this, PlayerActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 1, intent, 0);
 
-        Notification.Builder builder = new Notification.Builder(getApplicationContext());
-
+        Notification.Builder builder = new Notification.Builder(getApplicationContext())
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+        builder.addAction(R.drawable.ic_previous,"Previous",pendingIntent);
+        builder.addAction(R.drawable.ic_play,"Play",pendingIntent);
+        builder.addAction(R.drawable.ic_next,"Next",pendingIntent);
+        builder.setStyle(new Notification.MediaStyle().setShowActionsInCompactView());
         builder.setAutoCancel(false);
         builder.setTicker(Constant.name);
         builder.setContentTitle(Constant.name);
