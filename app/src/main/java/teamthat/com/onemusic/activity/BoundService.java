@@ -18,10 +18,11 @@ import android.view.View;
 import teamthat.com.onemusic.R;
 
 public class BoundService extends Service implements MediaPlayer.OnPreparedListener {
-static MediaPlayer mediaPlayer;
+    static MediaPlayer mediaPlayer;
     NotificationManager manager;
     Notification myNotication;
     PlayerActivity playerActivity;
+
     public static final String ACTION_PLAY = "com.example.action.PLAY";
     public start mstart;
     public updateProgress mudapteProgress;
@@ -34,17 +35,20 @@ static MediaPlayer mediaPlayer;
         mstart = new start();
         mudapteProgress = new updateProgress();
 
- }
+    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if(intent!=null){
-            if(intent.getAction().equals(ACTION_PLAY)){
-                mstart.execute();
-            }
+            try {
+                if (intent.getAction().equals(ACTION_PLAY)) {
+                    mstart.execute();
+                }
+            }catch (IllegalStateException e){
 
+            }
         }
- return START_STICKY;
+        return START_STICKY;
     }
     public void start(){
         mediaPlayer = new MediaPlayer();
@@ -71,9 +75,10 @@ static MediaPlayer mediaPlayer;
 
         mediaPlayer = null;
         if(manager!=null)
-        manager.cancel(11);
+            manager.cancel(11);
         mstart.cancel(true);
         mudapteProgress.cancel(true);
+        stopForeground(true);
         super.onDestroy();
     }
 
@@ -144,14 +149,14 @@ static MediaPlayer mediaPlayer;
         playerActivity.seekBar.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-             if(event.getAction()==MotionEvent.ACTION_MOVE){
-                 playerActivity.seekBar.setProgress(playerActivity.seekBar.getProgress());
-                 mediaPlayer.seekTo(playerActivity.seekBar.getProgress());
+                if(event.getAction()==MotionEvent.ACTION_MOVE){
+                    playerActivity.seekBar.setProgress(playerActivity.seekBar.getProgress());
+                    mediaPlayer.seekTo(playerActivity.seekBar.getProgress());
 
-                 return false;
-             }
+                    return false;
+                }
                 Log.d("mydebug", "Touched , Progress :" + playerActivity.seekBar.getProgress());
-              return true;
+                return true;
             }
         });
         mudapteProgress.execute(mp);
@@ -170,9 +175,9 @@ static MediaPlayer mediaPlayer;
 
 
     }
-    public void startForeground(){
+    public void startForeground() {
         manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        Intent intent = new Intent(this,PlayerActivity.class);
+        Intent intent = new Intent(this, PlayerActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 1, intent, 0);
 
@@ -184,21 +189,21 @@ static MediaPlayer mediaPlayer;
         builder.setContentText(ArtistFragment.artist.getName());
 
 
-
-          builder.setSmallIcon(R.drawable.icon);
-            builder.setContentIntent(pendingIntent);
-            builder.setOngoing(true);
+        builder.setSmallIcon(R.drawable.icon);
+        builder.setContentIntent(pendingIntent);
+        builder.setOngoing(true);
 //            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
 //                builder.setSubText("This is subtext...");   //API level 16
 //            }
-            builder.setNumber(100);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                builder.build();
-            }
+        builder.setNumber(100);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            builder.build();
+        }
 
-            myNotication = builder.getNotification();
-        manager.notify(11, myNotication);
- }
+        myNotication = builder.getNotification();
+        //  manager.notify(11, myNotication);
+        startForeground(11, myNotication);
+    }
 
     public class start extends AsyncTask<Void,Void,Void>{
 
@@ -215,7 +220,7 @@ static MediaPlayer mediaPlayer;
         protected Void doInBackground(MediaPlayer... mp) {
             boolean t = true;
             while(t){
-               // playerActivity.SetProgress(mp[0].getCurrentPosition());
+                // playerActivity.SetProgress(mp[0].getCurrentPosition());
                 publishProgress(mp[0].getCurrentPosition());
                 try {
                     Thread.sleep(1000);
@@ -223,11 +228,8 @@ static MediaPlayer mediaPlayer;
                     e.printStackTrace();
                 }
             }
-
-
-            return null;
+             return null;
         }
-
         @Override
         protected void onProgressUpdate(Integer... values) {
             super.onProgressUpdate(values);
@@ -235,6 +237,5 @@ static MediaPlayer mediaPlayer;
 
         }
     }
-
 
 }

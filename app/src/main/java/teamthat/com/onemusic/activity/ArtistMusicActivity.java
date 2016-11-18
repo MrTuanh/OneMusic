@@ -56,6 +56,7 @@ public class ArtistMusicActivity extends AppCompatActivity {
         Bundle bundle = myIntent.getBundleExtra("bundle");
         String imgArtist1 = bundle.getString("image");
         String id = bundle.getString("id");
+        Constant.artist_id=id;
         String name= bundle.getString("name");
         getSupportActionBar().setTitle(name);
         Picasso.with(this).load(LOGIN_API+imgArtist1).into(imgArtist);
@@ -67,7 +68,7 @@ public class ArtistMusicActivity extends AppCompatActivity {
 
        String url = makeGetSongOfArtist(id);
         Log.d("mydebug",url);
-        new getMusicOfArtist().execute(url);
+        new getMusicOfArtist().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,url);
 
         goToPlayerMusic();
     }
@@ -89,8 +90,9 @@ public class ArtistMusicActivity extends AppCompatActivity {
                     JSONObject cm = array.optJSONObject(i);
                     String nameMusic = cm.optString("name");
                     String pathMusic = cm.optString("musicpath");
+                    String id = cm.optString("id");
                     Log.d("mydebug",nameMusic);
-                    ArtistMusic music = new ArtistMusic(nameMusic, pathMusic);
+                    ArtistMusic music = new ArtistMusic(nameMusic, pathMusic,id);
                     listMusic.add(music);
 
                 }
@@ -172,11 +174,16 @@ public class ArtistMusicActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Constant.path =LoginActivity.LOGIN_API+listMusic.get(i).getMusicPath();
-
+                Constant.music_id = listMusic.get(i).getId();
                 index =i;
                 Constant.name = listMusic.get(i).getNameMusic();
                 artistMusic = listMusic.get(i);
+                Constant.artist_image = ArtistFragment.artist.getImage();
                 Intent intent = new Intent(getApplicationContext(), PlayerActivity.class);
+
+                intent.putExtra("name",true);
+                intent.putExtra("online",true);
+
                 startActivity(intent);
             }
         });
@@ -195,5 +202,5 @@ public class ArtistMusicActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-  
+
 }

@@ -13,7 +13,7 @@ import android.widget.RelativeLayout;
 import teamthat.com.onemusic.R;
 import teamthat.com.onemusic.activity.FavouriteMusicActivity;
 import teamthat.com.onemusic.activity.FolderMusicActivity;
-import teamthat.com.onemusic.activity.LocalMusicActivity;
+import teamthat.com.onemusic.activity.LocalArtist;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -86,7 +86,7 @@ public class HomeFragment extends Fragment {
         localBanner.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(getActivity(), LocalMusicActivity.class));
+                startActivity(new Intent(getActivity(), LocalArtist.class));
             }
         });
 

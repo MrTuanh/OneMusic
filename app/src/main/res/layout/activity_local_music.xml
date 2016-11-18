@@ -3,10 +3,10 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
+    <ListView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Local Music"
-        android:gravity="center"/>
+        android:layout_height="wrap_content"
+        android:id="@+id/listview"
+        ></ListView>
 
 </LinearLayout>

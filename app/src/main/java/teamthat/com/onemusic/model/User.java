@@ -25,9 +25,8 @@ public class User {
     public User() {
     }
 
-    public User(Context context,String id, String name, String username, String password, String birthday, String address, String gender, String phone, String level, String email, String vip, String image) {
-        prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        editor = prefs.edit();
+    public User(String id, String name, String username, String password, String birthday, String address, String gender, String phone, String level, String email, String vip, String image) {
+
         this.id = id;
         this.name = name;
         this.username = username;
@@ -40,19 +39,7 @@ public class User {
         this.email = email;
         this.vip = vip;
         this.image = image;
-        editor.putString("userid",id);
-        editor.putString("username",username);
-        editor.putString("name",name);
-        editor.putString("password",password);
-        editor.putString("birthday",birthday);
-        editor.putString("address",address);
-        editor.putString("gender",gender);
-        editor.putString("phone",phone);
-        editor.putString("level",level);
-        editor.putString("email",email);
-        editor.putString("vip",vip);
-        editor.putString("image",image);
-        editor.commit();
+
     }
     public void createSession(String id, String name, String username, String password, String birthday, String address, String gender, String phone, String level, String email, String vip, String image) {
 
@@ -79,7 +66,7 @@ public class User {
 
     public String getId() {
 
-        return prefs.getString("userid",null);
+        return this.id;
     }
 
     public void setId(String id) {
@@ -89,7 +76,7 @@ public class User {
     }
 
     public String getName() {
-        return prefs.getString("name",null);
+        return  this.name;
     }
 
     public void setName(String name) {
@@ -97,7 +84,7 @@ public class User {
     }
 
     public String getUsername() {
-        return prefs.getString("username",null);
+        return this.username;
     }
 
     public void setUsername(String username) {
@@ -105,7 +92,7 @@ public class User {
     }
 
     public String getPassword() {
-        return prefs.getString("password",null);
+        return this.password;
     }
 
     public void setPassword(String password) {
@@ -113,7 +100,7 @@ public class User {
     }
 
     public String getBirthday() {
-        return prefs.getString("birthday",null);
+        return this.birthday;
     }
 
     public void setBirthday(String birthday) {
@@ -121,7 +108,7 @@ public class User {
     }
 
     public String getAddress() {
-        return prefs.getString("address",null);
+        return this.address;
     }
 
     public void setAddress(String address) {
@@ -129,7 +116,7 @@ public class User {
     }
 
     public String getGender() {
-        return prefs.getString("gender",null);
+        return this.gender;
     }
 
     public void setGender(String gender) {
@@ -137,7 +124,7 @@ public class User {
     }
 
     public String getPhone() {
-        return prefs.getString("phone",null);
+        return this.phone;
     }
 
     public void setPhone(String phone) {
@@ -145,7 +132,7 @@ public class User {
     }
 
     public String getLevel() {
-        return prefs.getString("level",null);
+        return this.level;
     }
 
     public void setLevel(String level) {
@@ -153,7 +140,7 @@ public class User {
     }
 
     public String getEmail() {
-        return prefs.getString("email",null);
+        return this.email;
     }
 
     public void setEmail(String email) {
@@ -161,7 +148,7 @@ public class User {
     }
 
     public String getVip() {
-        return prefs.getString("vip",null);
+        return this.vip;
     }
 
     public void setVip(String vip) {
@@ -169,7 +156,7 @@ public class User {
     }
 
     public String getImage() {
-        return prefs.getString("image",null);
+        return this.image;
     }
 
     public void setImage(String image) {

@@ -8,13 +8,28 @@ public class ArtistMusic {
 
     String nameMusic;
     String musicPath;
+    String id;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public ArtistMusic() {
+
     }
 
     public ArtistMusic(String nameMusic, String musicPath) {
         this.nameMusic = nameMusic;
         this.musicPath = musicPath;
+    }
+    public ArtistMusic(String nameMusic, String musicPath,String id) {
+        this.nameMusic = nameMusic;
+        this.musicPath = musicPath;
+        this.id =id;
     }
 
     public String getNameMusic() {
