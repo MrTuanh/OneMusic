@@ -33,8 +33,11 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
         databaseHelper = new DatabaseHelper(this);
+
         Constant.sharedPreferences = getSharedPreferences("mypref", Context.MODE_PRIVATE);
         Constant.editor = Constant.sharedPreferences.edit();
+       // Util util = new Util();
+        //util.loadFavorite();
         artist = new Artist();
         if (Build.VERSION.SDK_INT >= 23) {
             requestPermissions();

@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import java.util.ArrayList;
 
 import teamthat.com.onemusic.model.Artist;
+import teamthat.com.onemusic.model.ArtistMusic;
 import teamthat.com.onemusic.model.User;
 
 /**
@@ -12,6 +13,11 @@ import teamthat.com.onemusic.model.User;
  */
 
 public class Constant {
+    public static String GETALLFAVORITE_API = "http://nghiahoang.net/api/appmusic/?function=getallfavoritesong";
+    public static String CHECKFAVORITED_API = "http://nghiahoang.net/api/appmusic/?function=checkfavorite";
+    public static String CHANGEFAVORITE_API = "http://nghiahoang.net/api/appmusic/?function=favoritesong";
+    public static ArrayList<ArtistMusic> listfavoriteSong= new ArrayList<>();
+
     static long a;
     static String path;
     static String music_id;
@@ -23,6 +29,6 @@ public class Constant {
     static ArrayList<String> listpath_music_downloading = new ArrayList<String>();
     static  boolean internetConnect = false;
     static User user;
-    static SharedPreferences sharedPreferences;
+    public static SharedPreferences sharedPreferences;
     static SharedPreferences.Editor editor;
 }

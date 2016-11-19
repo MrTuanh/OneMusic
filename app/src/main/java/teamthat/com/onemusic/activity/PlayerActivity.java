@@ -41,6 +41,7 @@ import java.net.URL;
 
 import teamthat.com.onemusic.DatabaseHelper.DatabaseHelper;
 import teamthat.com.onemusic.R;
+import teamthat.com.onemusic.Util.Util;
 import teamthat.com.onemusic.model.Artist;
 import teamthat.com.onemusic.model.ArtistMusic;
 
@@ -89,8 +90,8 @@ public class PlayerActivity extends AppCompatActivity {
         if(networkInfo !=null){
             try {
                 URL url = new URL(LoginActivity.LOGIN_API+Constant.artist.getImage());
-                Log.d("mydebug","tải được ảnh "+LoginActivity.LOGIN_API+Constant.artist_image);
-                setImage.execute(url);
+                Log.d("checkimage","tải được ảnh "+LoginActivity.LOGIN_API+Constant.artist_image);
+                setImage.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,url);
             } catch (MalformedURLException e) {
                 e.printStackTrace();
                 Log.d("mydebug","có lỗi khi tải ảnh"+e);
@@ -111,6 +112,7 @@ public class PlayerActivity extends AppCompatActivity {
         h = it.getBooleanExtra("online",false);
         if(!h){
             ibDowload.setEnabled(false);
+            ibFavourite.setEnabled(false);
         }
         boundService = new BoundService();
         intent = new Intent(PlayerActivity.this,BoundService.class);
@@ -222,7 +224,16 @@ public class PlayerActivity extends AppCompatActivity {
         ibFavourite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                Log.d("favorite","click onFavorite "+Constant.sharedPreferences.getString("Id",""));
+                if(!Constant.sharedPreferences.getString("Id","").equals("")){
+                    Log.d("favorite","not null");
+                    Util util = new Util();
+                    try {
+                        util.changeFavoriteSong(Constant.sharedPreferences.getString("Id",""),Constant.music_id);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
 
             }
         });
