@@ -25,6 +25,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 
+import teamthat.com.onemusic.DatabaseHelper.DatabaseHelper;
 import teamthat.com.onemusic.R;
 import teamthat.com.onemusic.model.User;
 
@@ -36,13 +37,14 @@ public class LoginActivity extends AppCompatActivity {
     Button btnLogin;
     TextView tvSinup;
     ProgressDialog progressDialog;
-
+    DatabaseHelper databaseHelper;
     public static final String LOGIN_API = "http://nghiahoang.net/api/appmusic/";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         addControl();
+        databaseHelper = new DatabaseHelper(this);
         progressDialog = new ProgressDialog(LoginActivity.this,
                 R.style.AppTheme_Dark_Dialog);
         progressDialog.setIndeterminate(true);
@@ -163,9 +165,14 @@ public class LoginActivity extends AppCompatActivity {
                         String Gender = userInfor.optString("gender");
                         String Level = userInfor.optString("level");
                         Log.d("mydebug","dn than cong "+Name);
-                        SplashActivity.user = new User(getApplicationContext());
-                        SplashActivity.user.createSession(UserId,Name,UserName,Password,Birthday,Address,Gender,Phone,Level,Email,Vip,Image);
-                      //  SplashActivity.user = new User(getApplicationContext(),UserId,Name,UserName,Password,Birthday,Address,Gender,Phone,Level,Email,Vip,Image);
+                        Constant.user = new User(UserId,Name,UserName,Password,Birthday,Address,Gender,Phone,Level,Email,Vip,Image);
+                       // databaseHelper.addUser(Constant.user);
+                        Constant.editor.putString("Id",UserId);
+                        Constant.editor.putString("Username",UserName);
+                        Constant.editor.putString("Image",Image);
+                        Constant.editor.putString("Email",Email);
+                        Constant.editor.putString("Name",Name);
+                        Constant.editor.commit();
                         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                         Log.d("mydebug","json image "+SplashActivity.user.getImage());
                         startActivityForResult(intent,1);

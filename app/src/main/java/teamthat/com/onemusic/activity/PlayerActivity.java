@@ -4,7 +4,12 @@ import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,8 +23,6 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,6 +53,7 @@ public class PlayerActivity extends AppCompatActivity {
     ImageButton ibPlay, ibPrevious, ibNext, ibFavourite, ibDowload;
   static  SeekBar seekBar;
    static TextView tvMinTime,tvMaxTime;
+    RoundImage roundImage;
     int k =0;
     static int index;
     NotificationManager manager;
@@ -57,6 +61,7 @@ public class PlayerActivity extends AppCompatActivity {
     DatabaseHelper databaseHelper;
     int max;
     boolean m = true;
+    setImage setImage;
     ArtistMusic song;
     final int HOUR = 60*60*1000;
     final int MINUTE = 60*1000;
@@ -76,11 +81,26 @@ public class PlayerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
         addCtrols();
+        setImage = new setImage();
         databaseHelper = new DatabaseHelper(PlayerActivity.this);
-        Picasso.with(this) //Context
-                .load(LoginActivity.LOGIN_API+Constant.artist_image) //URL/FILE
-                .into(image);//an ImageView Object to show the loaded image;
 
+        final ConnectivityManager connectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        final NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        if(networkInfo !=null){
+            try {
+                URL url = new URL(LoginActivity.LOGIN_API+Constant.artist.getImage());
+                Log.d("mydebug","tải được ảnh "+LoginActivity.LOGIN_API+Constant.artist_image);
+                setImage.execute(url);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+                Log.d("mydebug","có lỗi khi tải ảnh"+e);
+            }
+        }else{
+            Log.d("mydebug","tải ảnh mặc định");
+            Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(),R.drawable.ic_default);
+            roundImage = new RoundImage(bitmap);
+            image.setImageDrawable(roundImage);
+        }
         clickImgButton();
         index = ArtistMusicActivity.index;
         max = ArtistMusicActivity.max-1;
@@ -309,7 +329,7 @@ public class PlayerActivity extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
         finish();
-
+        setImage.cancel(true);
     }
     public class openService extends AsyncTask<Void,Integer,Integer>{
         @Override
@@ -657,6 +677,27 @@ public class PlayerActivity extends AppCompatActivity {
             }
 
             return forecastJsonStr;
+        }
+    }
+    public class setImage extends AsyncTask<URL,Void,Bitmap>{
+
+        @Override
+        protected Bitmap doInBackground(URL... params) {
+            try {
+                Bitmap image = BitmapFactory.decodeStream(params[0].openConnection().getInputStream());
+                return image;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+                super.onPostExecute(bitmap);
+            roundImage= new RoundImage(bitmap);
+            image.setImageDrawable(roundImage);
         }
     }
 

@@ -134,6 +134,7 @@ public class ArtistFragment extends Fragment {
             bundle.putString("name",listartist.get(position).getName());
             intent.putExtra("bundle",bundle);
            artist = listartist.get(position);
+            Constant.artist=listartist.get(position);
             startActivity(intent);
         }
     });

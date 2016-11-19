@@ -1,84 +1,72 @@
 package teamthat.com.onemusic.DatabaseHelper;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-
 import java.util.ArrayList;
-
 import teamthat.com.onemusic.model.Artist;
 import teamthat.com.onemusic.model.ArtistMusic;
-
+import teamthat.com.onemusic.model.User;
 /**
  * Created by ASUS on 11/15/2016.
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
-
-
-
     // Logcat tag
     private static final String LOG = "DatabaseHelper";
-
     // Database Version
     private static final int DATABASE_VERSION = 1;
-
     // Database Name
     private static final String DATABASE_NAME = "music";
-
     // Table Names
     private static final String TABLE_SONG = "songs";
     private static final String TABLE_ARTIST = "artists";
-
-
+    private static final String TABLE_USER  = "user";
     // Common column names
     private static final String KEY_ID = "id";
-
-
     // NOTES Table - column nmaes
     private static final String KEY_SONG_ID = "song_id";
     private static final String KEY_SONG_NAME = "song_name";
     private static final String KEY_SONG_PATH = "song_path";
     private static final String KEY_ARTIST_ID = "artist_id";
-
     // TAGS Table - column names
     private static final String KEY_ARTIST_NAME = "artist_name";
     private static final String KEY_ARTIST_IMAGE = "artist_image";
     private static final String KEY_ARTIST_DES = "artist_des";
-
-
-
+    // USER TABLE column name
+    private static final String KEY_USER_ID = "user_id";
+    private static final String KEY_USERNAME = "username";
+    private static final String KEY_IMAGE= "image";
+    private static final String KEY_EMAIL = "email";
+    private static final String KEY_PASSWORD = "password";
     // Table Create Statements
     // Todo table create statement
     private static final String CREATE_TABLE_SONG = "CREATE TABLE "
             + TABLE_SONG + "(" + KEY_ID + " INTEGER PRIMARY KEY,"+ KEY_SONG_ID + " INTEGER,"  + KEY_SONG_NAME
             + " TEXT," + KEY_SONG_PATH + " TEXT," + KEY_ARTIST_ID
             + " INTEGER" + ")";
-
     // Tag table create statement
     private static final String CREATE_TABLE_ARTIST = "CREATE TABLE " + TABLE_ARTIST
             + "(" + KEY_ID + " INTEGER PRIMARY KEY," + KEY_ARTIST_NAME + " TEXT,"+ KEY_ARTIST_ID + " TEXT,"
             + KEY_ARTIST_IMAGE + " TEXT," + KEY_ARTIST_DES + " TEXT" + ")";
-
-
-
-
+    // user table create statement
+    private static final String CREATE_TABLE_USER = "CREATE TALBE "+TABLE_USER+"("+KEY_ID+" INTEGER PRIMARY KEY,"+KEY_USER_ID+
+            " TEXT,"+KEY_USERNAME+" TEXT,"+KEY_PASSWORD+" TEXT,"+KEY_IMAGE+" TEXT,"+KEY_EMAIL+" TEXT "+")";
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
-
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_TABLE_ARTIST);
         db.execSQL(CREATE_TABLE_SONG);
+        db.execSQL(CREATE_TABLE_USER);
     }
-
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_ARTIST);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_SONG);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_USER);
         onCreate(db);
     }
     public long createArtist(Artist artist) {
@@ -95,8 +83,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return artist_id;
     }
-
-
     public ArrayList<Artist> getAllArtists() {
         ArrayList<Artist> artists = new ArrayList<Artist>();
         String selectQuery = "SELECT  * FROM " + TABLE_ARTIST;
@@ -223,5 +209,42 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             } while (c.moveToNext());
         }
         return songs;
+    }
+    // phương thức thêm người dùng mới
+    public long addUser(User user){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(KEY_USER_ID,user.getId());
+        values.put(KEY_USERNAME,user.getUsername());
+        values.put(KEY_IMAGE,user.getImage());
+        values.put(KEY_PASSWORD,user.getPassword());
+        values.put(KEY_EMAIL,user.getEmail());
+        long id = db.insert(TABLE_USER,null,values);
+        return id;
+    }
+    public User getUserByUserName(String username){
+        String query = "SELECT * FROM "+TABLE_USER+ " WHERE "+KEY_USERNAME+" = "+username;
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(query,null);
+        if(c!=null){
+            c.moveToFirst();
+            User user = new User();
+            user.setId(c.getString(c.getColumnIndex(KEY_USER_ID)));
+            user.setUsername(c.getString(c.getColumnIndex(KEY_USERNAME)));
+            user.setPassword(c.getString(c.getColumnIndex(KEY_PASSWORD)));
+            user.setImage(c.getString(c.getColumnIndex(KEY_IMAGE)));
+            user.setEmail(c.getString(c.getColumnIndex(KEY_EMAIL)));
+            return user;
+        }
+        return null;
+    }
+    public boolean checkExistUser(String userid){
+        String query = "SELECT * FROM "+TABLE_USER+" WHERE "+KEY_USER_ID+" = "+userid;
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(query,null);
+        if(c!=null&c.moveToFirst()){
+            return true;
+        }
+        return false;
     }
 }

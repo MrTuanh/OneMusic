@@ -1,9 +1,5 @@
 package teamthat.com.onemusic.model;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-
 /**
  * Created by ASUS on 11/1/2016.
  */
@@ -20,8 +16,7 @@ public class User {
     String email;
     String vip;
     String image;
-    private SharedPreferences prefs;
-    SharedPreferences.Editor editor;
+
     public User() {
     }
 
@@ -41,28 +36,7 @@ public class User {
         this.image = image;
 
     }
-    public void createSession(String id, String name, String username, String password, String birthday, String address, String gender, String phone, String level, String email, String vip, String image) {
 
-        editor.putString("userid",id);
-        editor.putString("username",username);
-        editor.putString("name",name);
-        editor.putString("password",password);
-        editor.putString("birthday",birthday);
-        editor.putString("address",address);
-        editor.putString("gender",gender);
-        editor.putString("phone",phone);
-        editor.putString("level",level);
-        editor.putString("email",email);
-        editor.putString("vip",vip);
-        editor.putString("image",image);
-        editor.commit();
-    }
-
-    public User(Context context){
-        prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        editor = prefs.edit();
-
-    }
 
     public String getId() {
 
@@ -71,8 +45,7 @@ public class User {
 
     public void setId(String id) {
         this.id = id;
-        editor.putString("userid",id);
-        editor.commit();
+
     }
 
     public String getName() {

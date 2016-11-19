@@ -53,6 +53,7 @@ public class BoundService extends Service implements MediaPlayer.OnPreparedListe
         return START_STICKY;
     }
     public void start(){
+        Log.d("checkForeground","vao start");
         mediaPlayer = new MediaPlayer();
         try {
             mediaPlayer.setDataSource(this, Uri.parse(Constant.path));
@@ -182,11 +183,11 @@ public class BoundService extends Service implements MediaPlayer.OnPreparedListe
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 
     public void startForeground() {
+        Log.d("checkForeground","vào startForegound "+Constant.name);
         manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         Intent intent = new Intent(this, PlayerActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 1, intent, 0);
-
         Notification.Builder builder = new Notification.Builder(getApplicationContext())
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
         builder.addAction(R.drawable.ic_previous,"Previous",pendingIntent);
@@ -196,22 +197,15 @@ public class BoundService extends Service implements MediaPlayer.OnPreparedListe
         builder.setAutoCancel(false);
         builder.setTicker(Constant.name);
         builder.setContentTitle(Constant.name);
-        builder.setContentText(ArtistFragment.artist.getName());
-
-
+        builder.setContentText(Constant.artist.getName());
         builder.setSmallIcon(R.drawable.icon);
         builder.setContentIntent(pendingIntent);
         builder.setOngoing(true);
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-//                builder.setSubText("This is subtext...");   //API level 16
-//            }
         builder.setNumber(100);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             builder.build();
         }
-
         myNotication = builder.getNotification();
-        //  manager.notify(11, myNotication);
         startForeground(11, myNotication);
     }
 

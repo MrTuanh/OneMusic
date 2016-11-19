@@ -1,6 +1,7 @@
 package teamthat.com.onemusic.activity;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -10,6 +11,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 
+import teamthat.com.onemusic.DatabaseHelper.DatabaseHelper;
 import teamthat.com.onemusic.R;
 import teamthat.com.onemusic.model.Artist;
 import teamthat.com.onemusic.model.User;
@@ -25,12 +27,14 @@ public class SplashActivity extends AppCompatActivity {
     boolean perm7 = false;
     public static User user;
     public static Artist artist;
-
+    DatabaseHelper databaseHelper;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
-
+        databaseHelper = new DatabaseHelper(this);
+        Constant.sharedPreferences = getSharedPreferences("mypref", Context.MODE_PRIVATE);
+        Constant.editor = Constant.sharedPreferences.edit();
         artist = new Artist();
         if (Build.VERSION.SDK_INT >= 23) {
             requestPermissions();

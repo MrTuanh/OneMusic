@@ -8,7 +8,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -36,8 +35,9 @@ public class LocalArtist extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Artist artist = listartist.get(position);
-                Toast.makeText(getApplicationContext(),artist.getName(),Toast.LENGTH_SHORT).show();
+
                 Intent intent = new Intent(LocalArtist.this,LocalMusicActivity.class);
+                Constant.artist=artist;
                 intent.putExtra("id",artist.getId());
                 Log.d("mydebug","id la "+artist.getId());
                 startActivityForResult(intent,10);

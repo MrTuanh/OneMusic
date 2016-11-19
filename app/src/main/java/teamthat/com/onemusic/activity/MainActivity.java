@@ -107,13 +107,9 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     private void loadNavHeader() {
         // name, email
 try {
-    if (SplashActivity.user == null) {
-        SplashActivity.user = new User(this);
-    }
+    txtName.setText(Constant.sharedPreferences.getString("Name",""));
 
-    txtName.setText(SplashActivity.user.getName());
-    Log.d("mydebug", "json image " + SplashActivity.user.getImage());
-    txtWebsite.setText(SplashActivity.user.getEmail());
+    txtWebsite.setText(Constant.sharedPreferences.getString("Email",""));
 
 }catch (NullPointerException e){
 
@@ -130,7 +126,7 @@ try {
 
         // Loading profile image
         try {
-            Glide.with(this).load(LoginActivity.LOGIN_API + SplashActivity.user.getImage())
+            Glide.with(this).load(LoginActivity.LOGIN_API + Constant.sharedPreferences.getString("Image",""))
                     .crossFade()
                     .thumbnail(0.5f)
                     .bitmapTransform(new CircleTransform(this))
