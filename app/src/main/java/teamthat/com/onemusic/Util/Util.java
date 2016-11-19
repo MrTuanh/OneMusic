@@ -1,7 +1,10 @@
 package teamthat.com.onemusic.Util;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.ArrayAdapter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,23 +26,33 @@ import teamthat.com.onemusic.model.ArtistMusic;
  */
 
 public class Util {
-    public void loadFavorite(){
-        //new reloadFavorite().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        try {
-            if(!Constant.sharedPreferences.getString("Id","").equals("")){
-                Log.d("favorite","id "+Constant.sharedPreferences.getString("Id",""));
-                getAllFavoriteSong(Constant.sharedPreferences.getString("Id",""));}
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+    ProgressDialog dialog;
+    public void showDialog(Context context){
+        dialog = ProgressDialog.show(context, "",
+                "Loading. Please wait...", true);
+        dialog.show();
+    }
+    public void dismissDialog(){
+        dialog.dismiss();
+    }
+    public void loadFavorite(final ArrayAdapter adapter){
+        new reloadFavorite(){
+            @Override
+            protected void onPostExecute(Void aVoid) {
+               super.onPostExecute(aVoid);
+                adapter.notifyDataSetChanged();
+                dismissDialog();
+
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
     public Boolean checkFavoriteSong(String userid,String songid) throws JSONException {
         getJson mygetJson = new getJson();
         String query = makeIsFavoriteSatement(userid,songid);
 
         mygetJson.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,query);
-        boolean favorited = parseJsonCheckFavorite(mygetJson.json);
-        return favorited;
+
+        return true;
     }
     public Boolean changeFavoriteSong(String userid,String songid) throws JSONException {
         Log.d("favorite","changeFavoriteSong "+songid);
@@ -60,7 +73,7 @@ public class Util {
                 super.onPostExecute(s);
                 try {
 //                    Constant.listfavoriteSong.removeAll(Constant.listfavoriteSong);
-                    Constant.listfavoriteSong = parseJsonGetAllFavorited(s);
+                  parseJsonGetAllFavorited(s);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -104,6 +117,7 @@ public class Util {
     public ArrayList<ArtistMusic> parseJsonGetAllFavorited(String json) throws JSONException {
         Log.d("favorite","vafo parse json");
         ArrayList<ArtistMusic> listMusic = new ArrayList<>();
+        Constant.listfavoriteSong.removeAll(Constant.listfavoriteSong);
         try{
             JSONArray array = new JSONArray(json);
             for(int i=0; i< array.length();i++ ){
@@ -186,12 +200,12 @@ public class Util {
 
    }
     public class reloadFavorite extends AsyncTask<Void,Void,Void>{
-
         @Override
         protected void onPreExecute() {
-            super.onPreExecute();
 
+            super.onPreExecute();
         }
+
         @Override
         protected Void doInBackground(Void... params) {
             try {
@@ -203,11 +217,6 @@ public class Util {
             return null;
         }
 
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-
-        }
     }
 
 

@@ -171,31 +171,6 @@ public class ArtistFragment extends Fragment {
     }
     // Connecto To Server
     public class getAllArtist extends AsyncTask<String,Artist,String> {
-        public void parseJsonResponse(String json){
-            try{
-
-                JSONArray array = new JSONArray(json);
-
-                for(int i=0; i< array.length();i++ ){
-                    JSONObject cm = array.optJSONObject(i);
-                    String artistId = cm.optString("ArtistId");
-                    String artistName = cm.optString("ArtistName");
-                    String image = cm.getString("Image");
-                    String des = cm.getString("Description");
-                    String love = cm.getString("Love");
-                    Log.d("mydebug",artistName);
-                    Artist artist = new Artist(artistId,artistName,image,love,des);
-                    listartist.add(artist);
-                }
-                ArtistBaseAdapter artistAdapter = new ArtistBaseAdapter(getActivity(), R.layout.item_artist, listartist);
-                gvArtist.setAdapter(artistAdapter);
-                artistAdapter.notifyDataSetChanged();
-
-            }catch (JSONException e){
-                e.printStackTrace();
-
-            }
-        }
 
         @Override
         protected void onPreExecute() {

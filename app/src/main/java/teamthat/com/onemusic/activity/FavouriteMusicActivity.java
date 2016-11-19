@@ -22,12 +22,13 @@ ListView listfavorite;
         setContentView(R.layout.activity_favourite_music);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         Constant.sharedPreferences = getSharedPreferences("mypref", Context.MODE_PRIVATE);
-        Util util = new Util();
-        util.loadFavorite();
-        listfavorite = (ListView) findViewById(R.id.listfavorite);
         adapter = new ArrayAdapter(this,android.R.layout.simple_list_item_1,Constant.listfavoriteSong);
+        listfavorite = (ListView) findViewById(R.id.listfavorite);
         listfavorite.setAdapter(adapter);
-        adapter.notifyDataSetChanged();
+        Util util = new Util();
+        util.loadFavorite(adapter);
+        util.showDialog(this);
+
     }
 
     @Override
@@ -45,5 +46,11 @@ ListView listfavorite;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
     }
 }

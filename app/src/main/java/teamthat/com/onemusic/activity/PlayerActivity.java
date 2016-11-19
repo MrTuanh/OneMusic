@@ -29,7 +29,6 @@ import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,12 +49,11 @@ import teamthat.com.onemusic.model.ArtistMusic;
  */
 
 public class PlayerActivity extends AppCompatActivity {
-               int i,j=0;
+    int i,j=0;
     ImageButton ibPlay, ibPrevious, ibNext, ibFavourite, ibDowload;
-  static  SeekBar seekBar;
-   static TextView tvMinTime,tvMaxTime;
+    static  SeekBar seekBar;
+    static TextView tvMinTime,tvMaxTime;
     RoundImage roundImage;
-    int k =0;
     static int index;
     NotificationManager manager;
     Notification myNotication;
@@ -63,20 +61,13 @@ public class PlayerActivity extends AppCompatActivity {
     int max;
     boolean m = true;
     setImage setImage;
-    ArtistMusic song;
-    final int HOUR = 60*60*1000;
-    final int MINUTE = 60*1000;
-    final int SECOND = 1000;
-
     boolean isPlayed = false;
-    String path;
     Intent intent;
     BoundService boundService;
     Bundle bundle;
     ImageView image;
     boolean h;
-      public static final String ACTION_PLAY = "com.example.action.PLAY";
-
+    public static final String ACTION_PLAY = "com.example.action.PLAY";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -146,8 +137,7 @@ public class PlayerActivity extends AppCompatActivity {
             }
         });
      }
-
-        public void addCtrols() {
+     public void addCtrols() {
             ibPlay = (ImageButton) findViewById(R.id.ib_play);
             ibPrevious = (ImageButton) findViewById(R.id.ib_previous);
             ibNext = (ImageButton) findViewById(R.id.ib_next);
@@ -159,7 +149,6 @@ public class PlayerActivity extends AppCompatActivity {
             tvMinTime = (TextView) findViewById(R.id.tv_start);
             image = (ImageView) findViewById(R.id.iv);
         }
-
     public void clickImgButton() {
         ibPlay.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -268,13 +257,11 @@ public class PlayerActivity extends AppCompatActivity {
             }
         });
     }
-
     @Override
     protected void onResume() {
         super.onResume();
 
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
          if(item.getItemId()==android.R.id.home) {
@@ -283,19 +270,6 @@ public class PlayerActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
 
     }
-
-    public int MyStart() throws IOException {
-        Log.d("process1","Main Activity MyStart");
-        try{
-
-        }catch (IllegalStateException e){
-
-        }
-        return 0;
-
-    }
-
-
     private boolean isServiceRunning() {
         ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)){
@@ -315,8 +289,8 @@ public class PlayerActivity extends AppCompatActivity {
         Notification.Builder builder = new Notification.Builder(getApplicationContext());
 
         builder.setAutoCancel(false);
-        builder.setTicker("Download");
-        builder.setContentTitle("Download");
+        builder.setTicker("Download "+Constant.name);
+        builder.setContentTitle(Constant.name);
         builder.setContentText("Download");
 
 
@@ -335,90 +309,11 @@ public class PlayerActivity extends AppCompatActivity {
           manager.notify(1, myNotication);
 
     }
-
     @Override
     public void onBackPressed() {
         super.onBackPressed();
         finish();
         setImage.cancel(true);
-    }
-    public class openService extends AsyncTask<Void,Integer,Integer>{
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-
-            try {
-                Log.d("process1","Main Activity Pre "+MyStart());
-                setMaxTime(MyStart());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-        }
-
-        @Override
-        protected Integer doInBackground(Void... params) {
-            Log.d("process1","Main Activity vao doInBackgroud");
-            boolean t = true;
-
-                 try{
-                while(t){
-
-                    Thread.sleep(1000);
-                }
-
-            }catch (IllegalStateException e){
-
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onProgressUpdate(Integer... values) {
-            super.onProgressUpdate(values);
-            SetProgress(values[0]);
-        }
-
-        @Override
-        protected void onPostExecute(Integer aVoid) {
-            super.onPostExecute(aVoid);
-
-        }
-    }
-
-    public class startService extends AsyncTask<Void,Void,Void>{
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            startService(intent);
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            new openService().execute();
-        }
-    }
-
-    public class stopMusic extends AsyncTask<Void,Void,Void>{
-
-        @Override
-        protected Void doInBackground(Void... params){
-
-            stopService(intent);
-            startService(intent);
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            new openService().execute();
-        }
     }
     public void setMaxTime(long duration){
         Log.d("process1","max time "+setTimeFormat(duration));
@@ -497,10 +392,7 @@ public class PlayerActivity extends AppCompatActivity {
 
     }
     public class downLoad extends AsyncTask<Void,Void,String>{
-        File file;
-        String id;
-
-
+      String id;
         String pathlocal ="sdcard/"+Constant.name+".mp3";
         public static final String GET_ARTIST_API = "http://nghiahoang.net/api/appmusic/?function=getartistbyid";
         public String makeGetSongOfArtist(String id) {
@@ -545,7 +437,7 @@ public class PlayerActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String aVoid) {
             super.onPostExecute(aVoid);
-           // manager.cancel(11);
+            manager.cancel(11);
             ArtistMusic artistMusic = new ArtistMusic(Constant.name,aVoid);
             if(id!=null){
                 Log.d("mydebug","bat dau luu id la 1 "+id);
