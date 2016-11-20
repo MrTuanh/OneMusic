@@ -36,7 +36,7 @@ public class SplashActivity extends AppCompatActivity {
 
         Constant.sharedPreferences = getSharedPreferences("mypref", Context.MODE_PRIVATE);
         Constant.editor = Constant.sharedPreferences.edit();
-       // Util util = new Util();
+
         //util.loadFavorite();
         artist = new Artist();
         if (Build.VERSION.SDK_INT >= 23) {

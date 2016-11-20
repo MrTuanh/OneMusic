@@ -173,7 +173,7 @@ public class PlayerActivity extends AppCompatActivity {
         ibPrevious.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                seekBar.setProgress(0);
                 ibPlay.setImageResource(R.drawable.ic_pause);
                 int k = getIndexOfMusic(0,-1);
 
@@ -195,7 +195,7 @@ public class PlayerActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 ibPlay.setImageResource(R.drawable.ic_pause);
-
+                seekBar.setProgress(0);
             int k = getIndexOfMusic(1,1);
             Constant.path =LoginActivity.LOGIN_API+ArtistMusicActivity.listMusic.get(k).getMusicPath();
                   Constant.name = ArtistMusicActivity.listMusic.get(k).getNameMusic();
@@ -219,9 +219,12 @@ public class PlayerActivity extends AppCompatActivity {
                     Util util = new Util();
                     try {
                         util.changeFavoriteSong(Constant.sharedPreferences.getString("Id",""),Constant.music_id);
+                        util.getAllFavoriteSong(Constant.sharedPreferences.getString("Id",""));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
+                }else{
+                    Toast.makeText(getApplicationContext(),"Vui lòng đăng nhập để thực hiện chức năng này",Toast.LENGTH_LONG).show();
                 }
 
             }

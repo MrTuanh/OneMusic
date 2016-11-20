@@ -27,6 +27,7 @@ import java.net.URLEncoder;
 
 import teamthat.com.onemusic.DatabaseHelper.DatabaseHelper;
 import teamthat.com.onemusic.R;
+import teamthat.com.onemusic.Util.Util;
 import teamthat.com.onemusic.model.User;
 
 public class LoginActivity extends AppCompatActivity {
@@ -173,6 +174,8 @@ public class LoginActivity extends AppCompatActivity {
                         Constant.editor.putString("Email",Email);
                         Constant.editor.putString("Name",Name);
                         Constant.editor.commit();
+
+
                         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                         Log.d("mydebug","json image "+SplashActivity.user.getImage());
                         startActivityForResult(intent,1);

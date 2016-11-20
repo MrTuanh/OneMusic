@@ -10,7 +10,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import teamthat.com.onemusic.R;
-import teamthat.com.onemusic.Util.Util;
 
 public class FavouriteMusicActivity extends AppCompatActivity {
 ListView listfavorite;
@@ -25,9 +24,11 @@ ListView listfavorite;
         adapter = new ArrayAdapter(this,android.R.layout.simple_list_item_1,Constant.listfavoriteSong);
         listfavorite = (ListView) findViewById(R.id.listfavorite);
         listfavorite.setAdapter(adapter);
-        Util util = new Util();
-        util.loadFavorite(adapter);
-        util.showDialog(this);
+        adapter.notifyDataSetChanged();
+//        Util util = new Util();
+//        //util.showDialog(this);
+//        util.loadFavorite(adapter);
+
 
     }
 

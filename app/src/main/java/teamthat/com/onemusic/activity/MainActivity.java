@@ -23,7 +23,10 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
+import org.json.JSONException;
+
 import teamthat.com.onemusic.R;
+import teamthat.com.onemusic.Util.Util;
 import teamthat.com.onemusic.fragment.HomeFragment;
 import teamthat.com.onemusic.fragment.MusicHotFragment;
 import teamthat.com.onemusic.fragment.MusicRankFragment;
@@ -74,7 +77,14 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         setSupportActionBar(toolbar);
         SplashActivity.user = new User();
         mHandler = new Handler();
-
+        if(!Constant.sharedPreferences.getString("Id","").equals("")){
+            try {
+                Util util = new Util();
+                util.getAllFavoriteSong(Constant.sharedPreferences.getString("Id",""));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         navigationView = (NavigationView) findViewById(R.id.nav_view);
 
