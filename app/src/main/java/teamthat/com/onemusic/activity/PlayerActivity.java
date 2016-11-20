@@ -284,7 +284,7 @@ public class PlayerActivity extends AppCompatActivity {
         manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         Intent intent = new Intent(this, PlayerActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 1, intent, 0);
+        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
 
         Notification.Builder builder = new Notification.Builder(getApplicationContext());
 
@@ -306,7 +306,7 @@ public class PlayerActivity extends AppCompatActivity {
         }
 
         myNotication = builder.getNotification();
-          manager.notify(1, myNotication);
+          manager.notify(Integer.parseInt(Constant.music_id), myNotication);
 
     }
     @Override
@@ -391,9 +391,13 @@ public class PlayerActivity extends AppCompatActivity {
         return index;
 
     }
-    public class downLoad extends AsyncTask<Void,Void,String>{
+    public class downLoad extends AsyncTask<Void,Void,String[]>{
       String id;
+        String songname = Constant.name;
+        String artistid = Constant.artist_id;
+
         String pathlocal ="sdcard/"+Constant.name+".mp3";
+        String songid = Constant.music_id;
         public static final String GET_ARTIST_API = "http://nghiahoang.net/api/appmusic/?function=getartistbyid";
         public String makeGetSongOfArtist(String id) {
             StringBuilder builder = new StringBuilder(GET_ARTIST_API);
@@ -432,31 +436,33 @@ public class PlayerActivity extends AppCompatActivity {
                 Log.d("mydebug","chuan bi vao");
             startForeground();
 
+
         }
 
         @Override
-        protected void onPostExecute(String aVoid) {
-            super.onPostExecute(aVoid);
-            manager.cancel(11);
-            ArtistMusic artistMusic = new ArtistMusic(Constant.name,aVoid);
+        protected void onPostExecute(String[] a) {
+            super.onPostExecute(a);
+            manager.cancel(Integer.parseInt(songid));
+            ArtistMusic artistMusic = new ArtistMusic(a[0],a[1]);
             if(id!=null){
                 Log.d("mydebug","bat dau luu id la 1 "+id);
-                databaseHelper.createSong(artistMusic,Integer.parseInt(id),Integer.parseInt(Constant.music_id));
+                databaseHelper.createSong(artistMusic,Integer.parseInt(id),Integer.parseInt(songid));
             }else{
                 Log.d("mydebug","bat dau luu id la 2 "+Constant.artist_id);
-                databaseHelper.createSong(artistMusic,Integer.parseInt(Constant.artist_id),Integer.parseInt(Constant.music_id));
+                databaseHelper.createSong(artistMusic,Integer.parseInt(Constant.artist_id),Integer.parseInt(songid));
             }
-            Constant.listpath_music_downloading.remove(Constant.music_id);
+            Constant.listpath_music_downloading.remove(songid);
 
-            Toast.makeText(getApplicationContext(),"tai da xong "+aVoid,Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(),"tai da xong "+a[0],Toast.LENGTH_SHORT).show();
         }
 
         @Override
-        protected String doInBackground(Void... params) {
+        protected String[] doInBackground(Void... params) {
             Log.d("mydebug","vao doInBAckground");
 
-            if(!databaseHelper.checkExistArtist(Constant.artist_id)){
-                String url = makeGetSongOfArtist(Constant.artist_id);
+
+            if(!databaseHelper.checkExistArtist(artistid)){
+                String url = makeGetSongOfArtist(artistid);
                 Log.d("mydebug",url);
                 String json = Request(url);
                 Log.d("mydebug",json);
@@ -464,14 +470,9 @@ public class PlayerActivity extends AppCompatActivity {
             }else{
                 Log.d("mydebug","nghe si da ton tai");
             }
-            //-----------------------------------------------
-
-
-                download();
-
-
-
-            return pathlocal;
+                 download();
+            String[]a = {songname,pathlocal};
+            return a;
 
         }
         public void download(){
