@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,8 +13,9 @@ import android.widget.RelativeLayout;
 
 import teamthat.com.onemusic.R;
 import teamthat.com.onemusic.activity.FavouriteMusicActivity;
-import teamthat.com.onemusic.activity.FolderMusicActivity;
 import teamthat.com.onemusic.activity.LocalArtist;
+
+import static teamthat.com.onemusic.activity.MainActivity.CURRENT_TAG;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -102,7 +104,13 @@ public class HomeFragment extends Fragment {
         folderBanner.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(getActivity(), FolderMusicActivity.class));
+               // startActivity(new Intent(getActivity(), Profile.class));
+                Profile fragment = new Profile();
+                FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+                fragmentTransaction.setCustomAnimations(android.R.anim.fade_in,
+                        android.R.anim.fade_out);
+                fragmentTransaction.replace(R.id.frame, fragment, CURRENT_TAG);
+                fragmentTransaction.commitAllowingStateLoss();
             }
         });
     }

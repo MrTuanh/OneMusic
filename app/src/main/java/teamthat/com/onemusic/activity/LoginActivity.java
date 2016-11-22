@@ -172,6 +172,8 @@ public class LoginActivity extends AppCompatActivity {
                         Constant.editor.putString("Image",Image);
                         Constant.editor.putString("Email",Email);
                         Constant.editor.putString("Name",Name);
+                        Constant.editor.putString("Password",Password);
+                        Constant.editor.putString("Phone",Phone);
                         Constant.editor.commit();
 
 

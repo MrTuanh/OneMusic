@@ -39,8 +39,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     private NavigationView navigationView;
     private DrawerLayout drawer;
     private View navHeader;
-    private ImageView imgNavHeaderBg, imgProfile;
-    private TextView txtName, txtWebsite;
+    private ImageView imgNavHeaderBg;
     private Toolbar toolbar;
     private SearchView searchView;
 
@@ -96,10 +95,10 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
         // Navigation view header
         navHeader = navigationView.getHeaderView(0);
-        txtName = (TextView) navHeader.findViewById(R.id.name);
-        txtWebsite = (TextView) navHeader.findViewById(R.id.website);
+        Constant.txtName = (TextView) navHeader.findViewById(R.id.name);
+        Constant.txtEmail = (TextView) navHeader.findViewById(R.id.website);
         imgNavHeaderBg = (ImageView) navHeader.findViewById(R.id.img_header_bg);
-        imgProfile = (ImageView) navHeader.findViewById(R.id.img_profile);
+        Constant.imgAvatar = (ImageView) navHeader.findViewById(R.id.img_profile);
 
         // load toolbar titles from string resources
         activityTitles = getResources().getStringArray(R.array.nav_item_activity_titles);
@@ -122,9 +121,9 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     private void loadNavHeader() {
         // name, email
 try {
-    txtName.setText(Constant.sharedPreferences.getString("Name",""));
+    Constant.txtName.setText(Constant.sharedPreferences.getString("Name",""));
 
-    txtWebsite.setText(Constant.sharedPreferences.getString("Email",""));
+    Constant.txtEmail.setText(Constant.sharedPreferences.getString("Email",""));
 
 }catch (NullPointerException e){
 
@@ -146,7 +145,7 @@ try {
                     .thumbnail(0.5f)
                     .bitmapTransform(new CircleTransform(this))
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .into(imgProfile);
+                    .into(Constant.imgAvatar);
         }catch(NullPointerException e){
             Log.d("mydebug", "user null");
         }

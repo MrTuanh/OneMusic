@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ArrayAdapter;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,6 +20,7 @@ import java.net.URL;
 import java.util.ArrayList;
 
 import teamthat.com.onemusic.activity.Constant;
+import teamthat.com.onemusic.fragment.Profile;
 import teamthat.com.onemusic.model.ArtistMusic;
 
 /**
@@ -27,11 +29,7 @@ import teamthat.com.onemusic.model.ArtistMusic;
 
 public class Util {
     ProgressDialog dialog;
-    public void showDialog(Context context){
-        dialog = ProgressDialog.show(context, "",
-                "Loading. Please wait...", true);
-        dialog.show();
-    }
+    boolean t;
     public void dismissDialog(){
         dialog.dismiss();
     }
@@ -65,22 +63,105 @@ public class Util {
     }
     public void getAllFavoriteSong(String userid) throws JSONException {
         String query = makeGetAllFavoriteSatement(userid);
+        new getJson(){
+            @Override
+            protected void onPostExecute(String s) {
+                super.onPostExecute(s);
+                try {
+                  parseJsonGetAllFavorited(s);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,query);}
+    public boolean changeName(final Context context, String userid, final String name){
+        String query = makechangeNameStatement(userid,name);
+        Log.d("profile","query "+query+" \n name "+name);
 
+//        this.context = context;
+        new getJson(){
+            @Override
+            protected void onPostExecute(String s) {
+                super.onPostExecute(s);
+                Log.d("profile","json la "+s);
+                try {
+                   t= parseJsonChangeProfile(context,0,s,name);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    t=false;
+                }
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,query);
+        return t;
+    }
+    public boolean changeUsername(final Context context, String userid, final String username){
+        String query = makechangeUserNameStatement(userid,username);
 
         new getJson(){
             @Override
             protected void onPostExecute(String s) {
                 super.onPostExecute(s);
                 try {
-//                    Constant.listfavoriteSong.removeAll(Constant.listfavoriteSong);
-                  parseJsonGetAllFavorited(s);
+                 t=   parseJsonChangeProfile(context,2,s,username);
                 } catch (JSONException e) {
                     e.printStackTrace();
+                    t=false;
                 }
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,query);
+      return t;
+    }
+    public boolean changeEmail(final Context context, String userid, final String email){
+       String query = makechangeEmailStatement(userid,email);
+
+        new getJson(){
+            @Override
+            protected void onPostExecute(String s) {
+                super.onPostExecute(s);
+                try {
+                  t=  parseJsonChangeProfile(context,1,s,email);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    t = false;
+                }
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,query);
+        return t;
+    }
+    public boolean parseJsonChangeProfile(Context context,int i,String json,String text) throws JSONException {
+        JSONObject response = new JSONObject(json);
+
+        boolean t =response.optBoolean("error");
+        String mes = response.optString("message");
+        if(t){
+            Toast.makeText(context,mes,Toast.LENGTH_LONG).show();
+        }else{
+            switch (i){
+                case 0:
+                    Constant.editor.putString("Name",text);
+
+                    Log.d("profile1","Name"+Constant.sharedPreferences.getString("Name",""));
+
+                    break;
+                case 1:
+                    Constant.editor.putString("Email",text);
+                    break;
+                case 2:
+                    Constant.editor.putString("Username",text);
+
+                    break;
+                default:
+                    break;
+            }
+            Constant.editor.commit();
+            Profile profile = new Profile();
+            profile.setValue();
+            Toast.makeText(context,mes,Toast.LENGTH_LONG).show();
+        }
+        return t;
 
     }
+
     public String makeChangeFavoriteSatement(String userid,String songid){
         StringBuilder builder = new StringBuilder(Constant.CHANGEFAVORITE_API);
         builder.append("&userid=").append(userid);
@@ -100,7 +181,24 @@ public class Util {
 
         return builder.toString();
     }
-
+    public String makechangeNameStatement(String userid,String name){
+        StringBuilder builder = new StringBuilder(Constant.CHANGENAME_API);
+        builder.append("&id=").append(userid);
+        builder.append("&name=").append(name);
+        return builder.toString();
+    }
+    public String makechangeUserNameStatement(String userid,String username){
+        StringBuilder builder = new StringBuilder(Constant.CHANGEUSERNAME_API);
+        builder.append("&id=").append(userid);
+        builder.append("&username=").append(username);
+        return builder.toString();
+    }
+    public String makechangeEmailStatement(String userid,String email){
+        StringBuilder builder = new StringBuilder(Constant.CHANGEEMAIL_API);
+        builder.append("&id=").append(userid);
+        builder.append("&email=").append(email);
+        return builder.toString();
+    }
     public Boolean parseJsonCheckFavorite(String json) throws JSONException {
         JSONObject response = new JSONObject(json);
         Boolean isFavorited = response.optBoolean("favorited");
@@ -111,11 +209,16 @@ public class Util {
         JSONObject response = new JSONObject(json);
         Boolean isFavorited = response.optBoolean("error");
         Log.d("favorite",isFavorited+"");
-        return isFavorited;
+        return isFavorited;}
 
-    }
+
+
+
+
+
+
     public ArrayList<ArtistMusic> parseJsonGetAllFavorited(String json) throws JSONException {
-        Log.d("favorite","vafo parse json");
+        Log.d("favorite","vafo parse json "+json);
         ArrayList<ArtistMusic> listMusic = new ArrayList<>();
         Constant.listfavoriteSong.removeAll(Constant.listfavoriteSong);
         try{
@@ -137,65 +240,83 @@ public class Util {
 
 
    public class getJson extends AsyncTask<String,String,String>{
-       String json="";
-
-
-
-       @Override
+            @Override
         protected String doInBackground(String... params) {
-            Log.d("favorite","vao doInBackground");
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
+            Log.d("profile","vao doInBackground "+params[0]);
+                Log.d("profile","mở urlconnection");
+                HttpURLConnection urlConnection = null;
 
-            // Will contain the raw JSON response as a string.
-            String forecastJsonStr = null;
+                BufferedReader reader = null;
 
-            try {
-                URL url = new URL(params[0]);
+                // Will contain the raw JSON response as a string.
+                String forecastJsonStr = null;
 
-                // Create the request to OpenWeatherMap, and open the connection
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
+                try {
+                    Log.d("profile","khai báo url "+params[0]);
 
-                // Read the input stream into a String
-                InputStream inputStream = urlConnection.getInputStream();
-                StringBuffer buffer = new StringBuffer();
-                if (inputStream == null) {
-                    // Nothing to do.
+                    URL url = new URL(params[0]);
+
+                    // Create the request to OpenWeatherMap, and open the connection
+                    Log.d("profile","tạo url connection");
+
+                    urlConnection = (HttpURLConnection) url.openConnection();
+                    Log.d("profile","set request method");
+
+                    urlConnection.setRequestMethod("GET");
+                    Log.d("profile","kết nối tới url");
+
+                    urlConnection.connect();
+
+                    // Read the input stream into a String
+                    int status = urlConnection.getResponseCode();
+                    Log.d("profile","khởi tạo input Stream "+status);
+
+                    InputStream inputStream = urlConnection.getInputStream();
+
+
+                    Log.d("profile","buffer");
+
+                    StringBuffer buffer = new StringBuffer();
+                    if (inputStream == null) {
+                        Log.d("profile","buffer rỗng");
+
+                        // Nothing to do.
+                        return null;
+                    }
+                    reader = new BufferedReader(new InputStreamReader(inputStream));
+                    Log.d("profile","lấy đk reader ");
+
+                    String line;
+                    Log.d("profile","line");
+
+                    while ((line = reader.readLine()) != null) {
+                        buffer.append(line + "\n");
+                    }
+
+                    if (buffer.length() == 0) {
+                        // Stream was empty.  No point in parsing.
+                        return null;
+                    }
+                    forecastJsonStr = buffer.toString();
+                    Log.d("mydebug",forecastJsonStr);
+                } catch (IOException e) {
+                    Log.e("PlaceholderFragment", "Error ", e);
                     return null;
-                }
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    buffer.append(line + "\n");
-                }
-
-                if (buffer.length() == 0) {
-                    // Stream was empty.  No point in parsing.
-                    return null;
-                }
-                forecastJsonStr = buffer.toString();
-                Log.d("mydebug",forecastJsonStr);
-            } catch (IOException e) {
-                Log.e("PlaceholderFragment", "Error ", e);
-                return null;
-            } finally{
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (final IOException e) {
-                        Log.e("PlaceholderFragment", "Error closing stream", e);
+                } finally{
+                    if (urlConnection != null) {
+                        urlConnection.disconnect();
+                    }
+                    if (reader != null) {
+                        try {
+                            reader.close();
+                        } catch (final IOException e) {
+                            Log.e("PlaceholderFragment", "Error closing stream", e);
+                        }
                     }
                 }
-            }
 
 
-            return forecastJsonStr;
+                return forecastJsonStr;
         }
 
    }
