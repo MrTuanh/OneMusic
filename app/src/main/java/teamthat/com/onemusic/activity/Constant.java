@@ -19,18 +19,18 @@ public class Constant {
     public static String CHANGEFAVORITE_API = "http://nghiahoang.net/api/appmusic/?function=favoritesong";
     public static ArrayList<ArtistMusic> listfavoriteSong= new ArrayList<>();
 
-    static long a;
-    static String path;
-    static String music_id;
-    static String name;
-    static String artist_id;
-    static String artist_image;
-    static Artist artist;
-    static String path_music_downloading;
-    static ArrayList<String> listpath_music_downloading = new ArrayList<String>();
-    static  boolean internetConnect = false;
-    static User user;
+    public  static long a;
+    public  static String path;
+    public  static String music_id;
+    public  static String name;
+    public  static String artist_id;
+    public static String artist_image;
+    public  static Artist artist;
+    public  static String path_music_downloading;
+    public static ArrayList<String> listpath_music_downloading = new ArrayList<String>();
+    public static  boolean internetConnect = false;
+   public static User user;
     public static Bitmap artistImage;
     public static SharedPreferences sharedPreferences;
-    static SharedPreferences.Editor editor;
+    public static SharedPreferences.Editor editor;
 }

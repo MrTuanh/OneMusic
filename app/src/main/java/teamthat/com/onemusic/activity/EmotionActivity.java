@@ -28,7 +28,7 @@ public class EmotionActivity extends AppCompatActivity {
                 Intent intent = new Intent(EmotionActivity.this, HappyActivity.class);
                 startActivity(intent);
                 finish();
-                overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+              //  overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
             }
         });
 
@@ -39,7 +39,7 @@ public class EmotionActivity extends AppCompatActivity {
                 Intent intent = new Intent(EmotionActivity.this, SadActivity.class);
                 startActivity(intent);
                 finish();
-                overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+               // overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
             }
         });
 
@@ -50,7 +50,7 @@ public class EmotionActivity extends AppCompatActivity {
                 Intent intent = new Intent(EmotionActivity.this, AngelActivity.class);
                 startActivity(intent);
                 finish();
-                overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+               // overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
             }
         });
 
@@ -61,7 +61,7 @@ public class EmotionActivity extends AppCompatActivity {
                 Intent intent = new Intent(EmotionActivity.this, MainActivity.class);
                 startActivity(intent);
                 finish();
-                overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+              //  overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
             }
         });
     }

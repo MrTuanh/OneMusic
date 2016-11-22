@@ -27,7 +27,6 @@ import java.net.URLEncoder;
 
 import teamthat.com.onemusic.DatabaseHelper.DatabaseHelper;
 import teamthat.com.onemusic.R;
-import teamthat.com.onemusic.Util.Util;
 import teamthat.com.onemusic.model.User;
 
 public class LoginActivity extends AppCompatActivity {
@@ -64,7 +63,7 @@ public class LoginActivity extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(), SignupActivity.class);
                 startActivityForResult(intent, REQUEST_SIGNUP);
                 finish();
-                overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+              //  overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
             }
         });
     }
@@ -269,8 +268,6 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(Void... params) {
            String json = makeLoginUrl(email,password);
-
-
             return json;
         }
     }

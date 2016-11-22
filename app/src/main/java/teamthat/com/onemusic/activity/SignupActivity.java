@@ -2,19 +2,37 @@ package teamthat.com.onemusic.activity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
+
 import teamthat.com.onemusic.R;
+import teamthat.com.onemusic.model.User;
+
+import static teamthat.com.onemusic.activity.LoginActivity.LOGIN_API;
 
 public class SignupActivity extends AppCompatActivity {
 
-    EditText edtName, edtAddress, edtEmail, edtPassword, edtReEnterPassword;
+    EditText edtName, edtUsername, edtEmail, edtPassword, edtReEnterPassword;
     Button btnSignup;
     TextView tvLogin;
 
@@ -37,14 +55,14 @@ public class SignupActivity extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(),LoginActivity.class);
                 startActivity(intent);
                 finish();
-                overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+              //  overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
             }
         });
     }
 
     private void addControl() {
         edtName = (EditText) findViewById(R.id.input_name);
-        edtAddress = (EditText) findViewById(R.id.input_address);
+        edtUsername = (EditText) findViewById(R.id.input_username);
         edtEmail = (EditText) findViewById(R.id.input_email);
         edtPassword = (EditText) findViewById(R.id.input_password);
         edtReEnterPassword = (EditText) findViewById(R.id.input_reEnterPassword);
@@ -80,8 +98,18 @@ public class SignupActivity extends AppCompatActivity {
 
     public void onSignupSuccess() {
         btnSignup.setEnabled(true);
+        User user = new User();
+        user.setName(edtName.getText().toString());
+        user.setUsername(edtUsername.getText().toString());
+        user.setEmail(edtEmail.getText().toString());
+        user.setPassword(edtPassword.getText().toString());
+
+        new SignUp().execute(user);
+
+
         setResult(RESULT_OK, null);
-        finish();
+
+        //finish();
     }
 
     public void onSignupFailed() {
@@ -93,7 +121,7 @@ public class SignupActivity extends AppCompatActivity {
         boolean valid = true;
 
         String name = edtName.getText().toString();
-        String address = edtAddress.getText().toString();
+        String address = edtUsername.getText().toString();
         String email = edtEmail.getText().toString();
         String password = edtPassword.getText().toString();
         String reEnterPassword = edtReEnterPassword.getText().toString();
@@ -106,10 +134,10 @@ public class SignupActivity extends AppCompatActivity {
         }
 
         if (address.isEmpty()) {
-            edtAddress.setError("Nhập điạ chỉ");
+            edtUsername.setError("Nhập tên đăng nhập");
             valid = false;
         } else {
-            edtAddress.setError(null);
+            edtUsername.setError(null);
         }
 
 
@@ -141,7 +169,164 @@ public class SignupActivity extends AppCompatActivity {
     public void onBackPressed() {
         startActivity(new Intent(getApplicationContext(), MainActivity.class));
         finish();
-        overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+      //  overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
         super.onBackPressed();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == 10){
+            finish();
+        }
+    }
+
+
+
+    //-----------------------------------------
+
+
+    class SignUp extends AsyncTask<User,String,String> {
+        public boolean parseJsonResponse(String json){
+            Log.d("loglogin","da vao parse json");
+            try{
+                JSONObject response = new JSONObject(json);
+                String error = response.optString("error");
+                // String message = response.optString("message");
+
+
+                switch(error){
+                    case "true":
+
+                        String message = response.optString("message");
+                        Log.d("loglogin","dang ky that bai "+message);
+                        // toast.makeText(context,message,Toast.LENGTH_LONG);
+                        onSignupFailed();
+                        return false;
+
+
+                    case "false":
+                        Log.d("loglogin","dang ky thanh cong ");
+                        JSONObject userInfor = response.optJSONObject("message");
+                        String UserId = userInfor.optString("Id");
+                        String Name = userInfor.optString("Name");
+                        String UserName = userInfor.optString("UserName");
+                        String Password = userInfor.optString("Password");
+                        String Image = userInfor.optString("image");
+                        String Birthday = userInfor.optString("birthday");
+                        String Address = userInfor.optString("address");
+                        String Vip = userInfor.optString("vip");
+                        String Email = userInfor.optString("email");
+                        String Phone = userInfor.optString("phone");
+                        String Gender = userInfor.optString("gender");
+                        String Level = userInfor.optString("level");
+                        Log.d("loglogin","dn than cong "+Name);
+                        Constant.user = new User(UserId,Name,UserName,Password,Birthday,Address,Gender,Phone,Level,Email,Vip,Image);
+                        // databaseHelper.addUser(Constant.user);
+                        Constant.editor.putString("Id",UserId);
+                        Constant.editor.putString("Username",UserName);
+                        Constant.editor.putString("Image",Image);
+                        Constant.editor.putString("Email",Email);
+                        Constant.editor.putString("Name",Name);
+                        Constant.editor.commit();
+                        // toast.makeText(context,"Đăng ký thành công",Toast.LENGTH_LONG).show();
+
+                        Intent intent = new Intent(SignupActivity.this,MainActivity.class);
+                        startActivityForResult(intent,10);
+                        return true;
+
+
+
+
+                    default:
+                        return false;
+
+                }
+                // Log.d("mydebug",error);
+
+
+
+            }catch (JSONException e){
+                e.printStackTrace();
+                //toast.makeText(context,"Có lỗi xảy ra "+e,Toast.LENGTH_LONG).show();
+
+                return false;
+
+            }
+        }
+        public String getJson(String name,String username,String email,String password) {
+            String data = null;
+            try {
+                data = URLEncoder.encode("dkjson", "UTF-8")
+                        + "=" + URLEncoder.encode("", "UTF-8");
+
+                data += "&" + URLEncoder.encode("name", "UTF-8") + "="
+                        + URLEncoder.encode(name, "UTF-8");
+
+                data += "&" + URLEncoder.encode("username", "UTF-8") + "="
+                        + URLEncoder.encode(username, "UTF-8");
+
+                data += "&" + URLEncoder.encode("email", "UTF-8") + "="
+                        + URLEncoder.encode(email, "UTF-8");
+
+                data += "&" + URLEncoder.encode("password", "UTF-8") + "="
+                        + URLEncoder.encode(password, "UTF-8");
+                data += "&" + URLEncoder.encode("ngaysinh", "UTF-8") + "="
+                        + URLEncoder.encode("11/03/1993", "UTF-8");
+
+
+
+
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+
+            String text = "";
+            BufferedReader reader=null;
+            URL url = null;
+            try {
+                url = new URL(LOGIN_API);
+                URLConnection conn = url.openConnection();
+                conn.setDoOutput(true);
+                OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+                wr.write( data );
+                wr.flush();
+                reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                StringBuilder sb = new StringBuilder();
+                String line = null;
+                // Read Server Response
+                while((line = reader.readLine()) != null)
+                {
+                    // Append server response in string
+                    sb.append(line + "\n");
+                }
+                text = sb.toString();
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            finally
+            {
+                try
+                {
+                    reader.close();
+                }
+                catch(Exception ex) {}
+            }
+            return text;}
+        @Override
+        protected String doInBackground(User... users) {
+            String json = getJson(users[0].getName(),users[0].getUsername(),users[0].getEmail(),users[0].getPassword());
+
+            return json;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+
+            super.onPostExecute(s);
+            parseJsonResponse(s);
+        }
     }
 }

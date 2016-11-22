@@ -270,7 +270,7 @@ try {
                         startActivity(new Intent(MainActivity.this, AboutUsActivity.class));
                         drawer.closeDrawers();
                         finish();
-                        overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+                       // overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
                         return true;
                     case R.id.nav_login:
                         // launch new intent instead of loading fragment
@@ -288,7 +288,7 @@ try {
                             startActivity(new Intent(MainActivity.this, LoginActivity.class));
                             drawer.closeDrawers();
                             finish();
-                            overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+                         //   overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
                             return true;
                         }
 

@@ -38,11 +38,11 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp">
-            <EditText android:id="@+id/input_address"
+            <EditText android:id="@+id/input_username"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textPostalAddress"
-                android:hint="Địa chỉ" />
+                android:inputType="text"
+                android:hint="Tên đăng nhập" />
         </android.support.design.widget.TextInputLayout>
 
         <!--  Email Label -->
@@ -83,6 +83,7 @@
                 android:inputType="textPassword"
                 android:hint="Nhập lại mật khẩu"/>
         </android.support.design.widget.TextInputLayout>
+
 
         <!-- Signup Button -->
         <android.support.v7.widget.AppCompatButton
