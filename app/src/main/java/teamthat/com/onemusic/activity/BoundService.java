@@ -198,7 +198,7 @@ public class BoundService extends Service implements MediaPlayer.OnPreparedListe
         builder.setTicker(Constant.name);
         builder.setContentTitle(Constant.name);
         builder.setContentText(Constant.artist.getName());
-        builder.setSmallIcon(R.drawable.icon);
+        builder.setSmallIcon(R.drawable.ic_default);
         builder.setContentIntent(pendingIntent);
         builder.setOngoing(true);
         builder.setNumber(100);

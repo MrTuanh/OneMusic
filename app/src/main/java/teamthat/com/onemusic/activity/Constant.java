@@ -1,6 +1,7 @@
 package teamthat.com.onemusic.activity;
 
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 
 import java.util.ArrayList;
 
@@ -29,6 +30,7 @@ public class Constant {
     static ArrayList<String> listpath_music_downloading = new ArrayList<String>();
     static  boolean internetConnect = false;
     static User user;
+    public static Bitmap artistImage;
     public static SharedPreferences sharedPreferences;
     static SharedPreferences.Editor editor;
 }

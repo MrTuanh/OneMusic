@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -23,6 +24,11 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.appindexing.Thing;
+import com.google.android.gms.common.api.GoogleApiClient;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -49,15 +55,16 @@ import teamthat.com.onemusic.model.ArtistMusic;
  */
 
 public class PlayerActivity extends AppCompatActivity {
-    int i,j=0;
+    int i, j = 0;
     ImageButton ibPlay, ibPrevious, ibNext, ibFavourite, ibDowload;
-    static  SeekBar seekBar;
-    static TextView tvMinTime,tvMaxTime;
+    static SeekBar seekBar;
+    static TextView tvMinTime, tvMaxTime;
     RoundImage roundImage;
     static int index;
     NotificationManager manager;
     Notification myNotication;
     DatabaseHelper databaseHelper;
+    Notification.Builder builder;
     int max;
     boolean m = true;
     setImage setImage;
@@ -68,163 +75,172 @@ public class PlayerActivity extends AppCompatActivity {
     ImageView image;
     boolean h;
     public static final String ACTION_PLAY = "com.example.action.PLAY";
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         addCtrols();
         setImage = new setImage();
         databaseHelper = new DatabaseHelper(PlayerActivity.this);
-
         final ConnectivityManager connectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
         final NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        if(networkInfo !=null){
+        if (networkInfo != null&networkInfo.isConnected()) {
+          //  Log.d("mydebug","co mang "+networkInfo.isConnected());
             try {
-                URL url = new URL(LoginActivity.LOGIN_API+Constant.artist.getImage());
-                Log.d("checkimage","tải được ảnh "+LoginActivity.LOGIN_API+Constant.artist_image);
-                setImage.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,url);
+                URL url = new URL(LoginActivity.LOGIN_API + Constant.artist.getImage());
+                Log.d("checkimage", "tải được ảnh " + LoginActivity.LOGIN_API + Constant.artist_image);
+                setImage.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url);
             } catch (MalformedURLException e) {
                 e.printStackTrace();
-                Log.d("mydebug","có lỗi khi tải ảnh"+e);
+                Log.d("mydebug", "có lỗi khi tải ảnh");
             }
-        }else{
-            Log.d("mydebug","tải ảnh mặc định");
-            Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(),R.drawable.ic_default);
+        } else {
+            Log.d("mydebug", "tải ảnh mặc định "+networkInfo.isConnected());
+            Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.ic_default);
             roundImage = new RoundImage(bitmap);
+            Bitmap bm = roundImage.getBitmap();
+            Constant.artistImage = bm;
             image.setImageDrawable(roundImage);
         }
         clickImgButton();
         index = ArtistMusicActivity.index;
-        max = ArtistMusicActivity.max-1;
-        Intent it= getIntent();
-        boolean t=false;
-        h= false;
-        t = it.getBooleanExtra("name",false);
-        h = it.getBooleanExtra("online",false);
-        if(!h){
+        max = ArtistMusicActivity.max - 1;
+        Intent it = getIntent();
+        boolean t = false;
+        h = false;
+        t = it.getBooleanExtra("name", false);
+        h = it.getBooleanExtra("online", false);
+        if (!h) {
             ibDowload.setEnabled(false);
             ibFavourite.setEnabled(false);
         }
         boundService = new BoundService();
-        intent = new Intent(PlayerActivity.this,BoundService.class);
+        intent = new Intent(PlayerActivity.this, BoundService.class);
         intent.setAction(ACTION_PLAY);
         ibPlay.setImageResource(R.drawable.ic_pause);
-
         getSupportActionBar().setTitle(Constant.name);
         // nếu chưa có service chạy, thì khởi tạo service
-        Log.d("mydebug","onCreate");
-        if(isServiceRunning()&t){
-            Log.d("mydebug","chay lai service 1 "+isServiceRunning());
+        Log.d("mydebug", "onCreate");
+        if (isServiceRunning() & t) {
+            Log.d("mydebug", "chay lai service 1 " + isServiceRunning());
             stopService(intent);
-             startService(intent);
-        }else{
-            Log.d("mydebug","chay lai 2"+isServiceRunning()+" "+t);
+            startService(intent);
+        } else {
+            Log.d("mydebug", "chay lai 2" + isServiceRunning() + " " + t);
             startService(intent);
         }
-
-        if(BoundService.mediaPlayer!=null){
+        if (BoundService.mediaPlayer != null) {
             setMaxTime(BoundService.mediaPlayer.getDuration());
-            Log.d("mydebug","duration "+BoundService.mediaPlayer.getDuration());
+            Log.d("mydebug", "duration " + BoundService.mediaPlayer.getDuration());
         }
         seekBar.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-              if(event.getAction()==MotionEvent.ACTION_MOVE){
-                  seekBar.setProgress(seekBar.getProgress());
-
-              }
+                if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                    seekBar.setProgress(seekBar.getProgress());
+                }
                 return false;
             }
         });
-     }
-     public void addCtrols() {
-            ibPlay = (ImageButton) findViewById(R.id.ib_play);
-            ibPrevious = (ImageButton) findViewById(R.id.ib_previous);
-            ibNext = (ImageButton) findViewById(R.id.ib_next);
-            ibFavourite = (ImageButton) findViewById(R.id.ib_favourite);
-            ibDowload = (ImageButton) findViewById(R.id.ib_dowload);
-            seekBar = (SeekBar) findViewById(R.id.seekBar);
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+    }
+    public void addCtrols() {
+        ibPlay = (ImageButton) findViewById(R.id.ib_play);
+        ibPrevious = (ImageButton) findViewById(R.id.ib_previous);
+        ibNext = (ImageButton) findViewById(R.id.ib_next);
+        ibFavourite = (ImageButton) findViewById(R.id.ib_favourite);
+        ibDowload = (ImageButton) findViewById(R.id.ib_dowload);
+        seekBar = (SeekBar) findViewById(R.id.seekBar);
 
-            tvMaxTime = (TextView) findViewById(R.id.tv_end);
-            tvMinTime = (TextView) findViewById(R.id.tv_start);
-            image = (ImageView) findViewById(R.id.iv);
-        }
+        tvMaxTime = (TextView) findViewById(R.id.tv_end);
+        tvMinTime = (TextView) findViewById(R.id.tv_start);
+        image = (ImageView) findViewById(R.id.iv);
+    }
     public void clickImgButton() {
         ibPlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(isPlayed){
+                if (isPlayed) {
                     i++;
                     ibPlay.setImageResource(R.drawable.ic_pause);
-                        Log.d("mydebug","play "+i);
-                      BoundService.mediaPlayer.start();
-                        isPlayed=false;
-                }else{
+                    Log.d("mydebug", "play " + i);
+                    BoundService.mediaPlayer.start();
+                    isPlayed = false;
+                } else {
                     j++;
-                      ibPlay.setImageResource(R.drawable.ic_play);
-                     Log.d("mydebug","pause "+j);
-                      BoundService.mediaPlayer.pause();
+                    ibPlay.setImageResource(R.drawable.ic_play);
+                    Log.d("mydebug", "pause " + j);
+                    BoundService.mediaPlayer.pause();
 
-                    isPlayed=true;
+                    isPlayed = true;
                 }
-             }
+            }
         });
 
         ibPrevious.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 seekBar.setProgress(0);
+                tvMinTime.setText("00:00");
+                tvMaxTime.setText("00:00");
                 ibPlay.setImageResource(R.drawable.ic_pause);
-                int k = getIndexOfMusic(0,-1);
-
-                Constant.path =LoginActivity.LOGIN_API+ArtistMusicActivity.listMusic.get(k).getMusicPath();
-                   Constant.name = ArtistMusicActivity.listMusic.get(k).getNameMusic();
+                int k = getIndexOfMusic(0, -1);
+                Constant.path = LoginActivity.LOGIN_API + ArtistMusicActivity.listMusic.get(k).getMusicPath();
+                Constant.name = ArtistMusicActivity.listMusic.get(k).getNameMusic();
                 getSupportActionBar().setTitle(Constant.name);
-                Log.d("mydebug","previous "+k+" = "+Constant.path);
-                if(isServiceRunning()){
+                Log.d("mydebug", "previous " + k + " = " + Constant.path);
+                if (isServiceRunning()) {
                     stopService(intent);
-
                 }
                 startService(intent);
-              //  new openService().execute();
-                    isPlayed=false;
-                 }
-             });
+                //  new openService().execute();
+                isPlayed = false;
+            }
+        });
 
         ibNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 ibPlay.setImageResource(R.drawable.ic_pause);
                 seekBar.setProgress(0);
-            int k = getIndexOfMusic(1,1);
-            Constant.path =LoginActivity.LOGIN_API+ArtistMusicActivity.listMusic.get(k).getMusicPath();
-                  Constant.name = ArtistMusicActivity.listMusic.get(k).getNameMusic();
+                int k = getIndexOfMusic(1, 1);
+                Constant.path = LoginActivity.LOGIN_API + ArtistMusicActivity.listMusic.get(k).getMusicPath();
+                Constant.name = ArtistMusicActivity.listMusic.get(k).getNameMusic();
                 getSupportActionBar().setTitle(Constant.name);
-               Log.d("mydebug","next "+k+" = "+Constant.path);
-                isPlayed=false;
-                        if(isServiceRunning()){
-                                    stopService(intent);
-                           }
-                   startService(intent);
+                Log.d("mydebug", "next " + k + " = " + Constant.path);
+                isPlayed = false;
+                if (isServiceRunning()) {
+                    stopService(intent);
+                }
+                startService(intent);
 
-             }
+            }
         });
 
         ibFavourite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d("favorite","click onFavorite "+Constant.sharedPreferences.getString("Id",""));
-                if(!Constant.sharedPreferences.getString("Id","").equals("")){
-                    Log.d("favorite","not null");
+                Log.d("favorite", "click onFavorite " + Constant.sharedPreferences.getString("Id", ""));
+                if (!Constant.sharedPreferences.getString("Id", "").equals("")) {
+                    Log.d("favorite", "not null");
                     Util util = new Util();
                     try {
-                        util.changeFavoriteSong(Constant.sharedPreferences.getString("Id",""),Constant.music_id);
-                        util.getAllFavoriteSong(Constant.sharedPreferences.getString("Id",""));
+                        util.changeFavoriteSong(Constant.sharedPreferences.getString("Id", ""), Constant.music_id);
+                        util.getAllFavoriteSong(Constant.sharedPreferences.getString("Id", ""));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                }else{
-                    Toast.makeText(getApplicationContext(),"Vui lòng đăng nhập để thực hiện chức năng này",Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Vui lòng đăng nhập để thực hiện chức năng này", Toast.LENGTH_LONG).show();
                 }
 
             }
@@ -233,68 +249,77 @@ public class PlayerActivity extends AppCompatActivity {
         ibDowload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d("mydebug","bam vao day");
-                Log.d("mydebug","Constant hien tai la "+Constant.music_id);
-               if( databaseHelper.checkExistSong(Constant.music_id)){
+                Log.d("mydebug", "bam vao day");
+                Log.d("mydebug", "Constant hien tai la " + Constant.music_id);
+                if (databaseHelper.checkExistSong(Constant.music_id)) {
 
-                   Toast.makeText(getApplicationContext(),"Bai hat da tai ve",Toast.LENGTH_SHORT).show();
-               }else{
-                   for(int i=0;i<Constant.listpath_music_downloading.size();i++){
-                       if(Constant.listpath_music_downloading.get(i).equals(Constant.music_id)){
-                           Log.d("mydebug","Check list downloading "+Constant.listpath_music_downloading.get(i));
-                           m=false;
-                       }
-                   }
-                   if(m) {
-                       Constant.listpath_music_downloading.add(Constant.music_id);
-                       Log.d("mydebug","Vao thoi");
-                       new downLoad().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                   }else{
-                       Log.d("mydebug","bai hat dang duoc tai ve");
-                       Log.d("mydebug","Constant hien tai la "+Constant.music_id);
-                       Toast.makeText(getApplicationContext(),"Bai hat dang tai ve",Toast.LENGTH_SHORT).show();
-                   }
-               }
+                    Toast.makeText(getApplicationContext(), "Bai hat da tai ve", Toast.LENGTH_SHORT).show();
+                } else {
+                    for (int i = 0; i < Constant.listpath_music_downloading.size(); i++) {
+                        if (Constant.listpath_music_downloading.get(i).equals(Constant.music_id)) {
+                            Log.d("mydebug", "Check list downloading " + Constant.listpath_music_downloading.get(i));
+                            m = false;
+                        }
+                    }
+                    if (m) {
+                        Constant.listpath_music_downloading.add(Constant.music_id);
+                        Log.d("mydebug", "Vao thoi");
+                        startForeground();
+                    } else {
+                        Log.d("mydebug", "bai hat dang duoc tai ve");
+                        Log.d("mydebug", "Constant hien tai la " + Constant.music_id);
+                        Toast.makeText(getApplicationContext(), "Bai hat dang tai ve", Toast.LENGTH_SHORT).show();
+                    }
+                }
 
 
             }
         });
     }
+
     @Override
     protected void onResume() {
         super.onResume();
 
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-         if(item.getItemId()==android.R.id.home) {
-            finish();
-        }
-        return super.onOptionsItemSelected(item);
+        int id = item.getItemId();
 
+        //noinspection SimplifiableIfStatement
+        if (id == android.R.id.home) {
+            // finish the activity
+            onBackPressed();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
+
     private boolean isServiceRunning() {
         ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)){
-            if("teamthat.com.onemusic.activity.BoundService".equals(service.service.getClassName())) {
-                Log.d("process1","ten service "+service.service.getClassName());
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if ("teamthat.com.onemusic.activity.BoundService".equals(service.service.getClassName())) {
+                Log.d("process1", "ten service " + service.service.getClassName());
                 return true;
             }
         }
         return false;
     }
+
     public void startForeground() {
         manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         Intent intent = new Intent(this, PlayerActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
 
-        Notification.Builder builder = new Notification.Builder(getApplicationContext());
+        builder = new Notification.Builder(getApplicationContext());
 
-        builder.setAutoCancel(false);
-        builder.setTicker("Download "+Constant.name);
+        //builder.setAutoCancel(false);
+        builder.setTicker("Download " + Constant.name);
         builder.setContentTitle(Constant.name);
-        builder.setContentText("Download");
+        new downLoad().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 
         builder.setSmallIcon(R.drawable.icon);
@@ -309,20 +334,23 @@ public class PlayerActivity extends AppCompatActivity {
         }
 
         myNotication = builder.getNotification();
-          manager.notify(Integer.parseInt(Constant.music_id), myNotication);
+        manager.notify(Integer.parseInt(Constant.music_id), myNotication);
 
     }
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
         finish();
         setImage.cancel(true);
     }
-    public void setMaxTime(long duration){
-        Log.d("process1","max time "+setTimeFormat(duration));
-       seekBar.setMax((int)duration);
-       tvMaxTime.setText(setTimeFormat(duration));
+
+    public void setMaxTime(long duration) {
+        Log.d("process1", "max time " + setTimeFormat(duration));
+        seekBar.setMax((int) duration);
+        tvMaxTime.setText(setTimeFormat(duration));
     }
+
     public String setTimeFormat(long time) {
         final int HOUR = 60 * 60 * 1000;
         final int MINUTE = 60 * 1000;
@@ -332,7 +360,7 @@ public class PlayerActivity extends AppCompatActivity {
         final long minute = _hour / MINUTE;
         final long _minute = _hour % MINUTE;
         final long second = _minute / SECOND;
-        String result ="";
+        String result = "";
         String mi = "";
         String se = "";
         String ho = "";
@@ -350,7 +378,7 @@ public class PlayerActivity extends AppCompatActivity {
             } else {
                 se = second + "";
             }
-            result =(mi + ":" + se);
+            result = (mi + ":" + se);
 
         } else {
             if (minute < 10) {
@@ -373,35 +401,75 @@ public class PlayerActivity extends AppCompatActivity {
             } else {
                 ho = hour + "";
             }
-            result=(ho + ":" + mi + ":" + se);
+            result = (ho + ":" + mi + ":" + se);
         }
         return result;
     }
-    public void SetProgress(long time){
-        Log.d("process1","progress time "+setTimeFormat(time));
-        seekBar.setProgress((int)time);
+
+    public void SetProgress(long time) {
+        Log.d("process1", "progress time " + setTimeFormat(time));
+        seekBar.setProgress((int) time);
         tvMinTime.setText(setTimeFormat(time));
     }
-    public int getIndexOfMusic(int k,int i){
 
-        if(index == max&k==1){
-            index =0;
-        }else if(index ==0&k==0){
+    public int getIndexOfMusic(int k, int i) {
+
+        if (index == max & k == 1) {
+            index = 0;
+        } else if (index == 0 & k == 0) {
             index = max;
-        }else{
-            index +=i;
+        } else {
+            index += i;
         }
         return index;
 
     }
-    public class downLoad extends AsyncTask<Void,Void,String[]>{
-      String id;
+
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    public Action getIndexApiAction() {
+        Thing object = new Thing.Builder()
+                .setName("Player Page") // TODO: Define a title for the content shown.
+                // TODO: Make sure this auto-generated URL is correct.
+                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
+                .build();
+        return new Action.Builder(Action.TYPE_VIEW)
+                .setObject(object)
+                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
+                .build();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        AppIndex.AppIndexApi.start(client, getIndexApiAction());
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        AppIndex.AppIndexApi.end(client, getIndexApiAction());
+        client.disconnect();
+    }
+
+    public class downLoad extends AsyncTask<Void, Void, String[]> {
+        String id;
         String songname = Constant.name;
         String artistid = Constant.artist_id;
 
-        String pathlocal ="sdcard/"+Constant.name+".mp3";
+        String pathlocal = "sdcard/" + Constant.name + ".mp3";
         String songid = Constant.music_id;
         public static final String GET_ARTIST_API = "http://nghiahoang.net/api/appmusic/?function=getartistbyid";
+
         public String makeGetSongOfArtist(String id) {
             StringBuilder builder = new StringBuilder(GET_ARTIST_API);
             builder.append("&artistid=").append(id);
@@ -409,17 +477,17 @@ public class PlayerActivity extends AppCompatActivity {
             return builder.toString();
         }
 
-        public void parseJsonResponse(String json){
+        public void parseJsonResponse(String json) {
             try {
                 JSONObject jsonObject = new JSONObject(json);
-               id = jsonObject.getString("Id");
-                Log.d("mydebug","id lay xuong la "+id);
+                id = jsonObject.getString("Id");
+                Log.d("mydebug", "id lay xuong la " + id);
                 String name = jsonObject.getString("Name");
                 String image = jsonObject.getString("Image");
                 String des = jsonObject.getString("Des");
                 String love = jsonObject.getString("Love");
                 String listen = jsonObject.getString("Listen");
-                Artist artist = new Artist(id,name,image,love,des);
+                Artist artist = new Artist(id, name, image, love, des);
                 databaseHelper.createArtist(artist);
 
 
@@ -427,6 +495,7 @@ public class PlayerActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+
         @Override
         protected void onProgressUpdate(Void... values) {
             super.onProgressUpdate(values);
@@ -436,8 +505,8 @@ public class PlayerActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-                Log.d("mydebug","chuan bi vao");
-            startForeground();
+            Log.d("mydebug", "chuan bi vao");
+           // startForeground();
 
 
         }
@@ -446,93 +515,98 @@ public class PlayerActivity extends AppCompatActivity {
         protected void onPostExecute(String[] a) {
             super.onPostExecute(a);
             manager.cancel(Integer.parseInt(songid));
-            ArtistMusic artistMusic = new ArtistMusic(a[0],a[1]);
-            if(id!=null){
-                Log.d("mydebug","bat dau luu id la 1 "+id);
-                databaseHelper.createSong(artistMusic,Integer.parseInt(id),Integer.parseInt(songid));
-            }else{
-                Log.d("mydebug","bat dau luu id la 2 "+Constant.artist_id);
-                databaseHelper.createSong(artistMusic,Integer.parseInt(Constant.artist_id),Integer.parseInt(songid));
+            ArtistMusic artistMusic = new ArtistMusic(a[0], a[1]);
+            if (id != null) {
+                Log.d("mydebug", "bat dau luu id la 1 " + id);
+                databaseHelper.createSong(artistMusic, Integer.parseInt(id), Integer.parseInt(songid));
+            } else {
+                Log.d("mydebug", "bat dau luu id la 2 " + Constant.artist_id);
+                databaseHelper.createSong(artistMusic, Integer.parseInt(Constant.artist_id), Integer.parseInt(songid));
             }
             Constant.listpath_music_downloading.remove(songid);
 
-            Toast.makeText(getApplicationContext(),"tai da xong "+a[0],Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "tai da xong " + a[0], Toast.LENGTH_SHORT).show();
         }
 
         @Override
         protected String[] doInBackground(Void... params) {
-            Log.d("mydebug","vao doInBAckground");
+            Log.d("mydebug", "vao doInBAckground");
 
 
-            if(!databaseHelper.checkExistArtist(artistid)){
+            if (!databaseHelper.checkExistArtist(artistid)) {
                 String url = makeGetSongOfArtist(artistid);
-                Log.d("mydebug",url);
+                Log.d("mydebug", url);
                 String json = Request(url);
-                Log.d("mydebug",json);
+                Log.d("mydebug", json);
                 parseJsonResponse(json);
-            }else{
-                Log.d("mydebug","nghe si da ton tai");
+            } else {
+                Log.d("mydebug", "nghe si da ton tai");
             }
-                 download();
-            String[]a = {songname,pathlocal};
+            download();
+            String[] a = {songname, pathlocal};
             return a;
 
         }
-        public void download(){
 
-            InputStream inputStream=null;
+        public void download() {
+
+            InputStream inputStream = null;
             OutputStream outputStream = null;
             HttpURLConnection httpURLConnection = null;
-            Log.d("mydebug","dang tai");
+            Log.d("mydebug", "dang tai");
             try {
                 URL url = new URL(Constant.path);
-                inputStream =  new BufferedInputStream(url.openStream(), 8192);;
+                inputStream = new BufferedInputStream(url.openStream(), 8192);
+                ;
                 httpURLConnection = (HttpURLConnection) url.openConnection();
                 httpURLConnection.connect();
-                if(httpURLConnection.getResponseCode()!= HttpURLConnection.HTTP_OK){
+                if (httpURLConnection.getResponseCode() != HttpURLConnection.HTTP_OK) {
 
                 }
                 int fileLength = httpURLConnection.getContentLength();
                 //file = new File("sdcard/"+Constant.name+".mp3");
 
                 outputStream = new FileOutputStream(pathlocal);
-                byte data[]= new byte[4069];
+                byte data[] = new byte[4069];
                 long total = 0;
                 int count;
-                while((count = inputStream.read(data))!=-1){
-                    if(isCancelled()){
+                while ((count = inputStream.read(data)) != -1) {
+                    if (isCancelled()) {
                         inputStream.close();
-                       return;
+                        return;
                     }
                     total += count;
-                    Log.d("mydebug","tai den "+total);
-                    if(fileLength>0){
+                    builder.setProgress(fileLength,(int)total,false);
+                    manager.notify(Integer.parseInt(Constant.music_id), myNotication);
+                    Log.d("mydebug", "tai den " + total);
+                    if (fileLength > 0) {
 
-                        outputStream.write(data,0,count);
+                        outputStream.write(data, 0, count);
                     }
                 }
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
-            }finally {
-                try{
-                    if(outputStream!=null){
+            } finally {
+                try {
+                    if (outputStream != null) {
                         outputStream.close();
                     }
-                    if(inputStream!=null){
+                    if (inputStream != null) {
                         inputStream.close();
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                if(httpURLConnection!=null){
+                if (httpURLConnection != null) {
                     httpURLConnection.disconnect();
                 }
             }
 
         }
-        public String Request(String Url){
+
+        public String Request(String Url) {
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
 
@@ -566,11 +640,11 @@ public class PlayerActivity extends AppCompatActivity {
                     return null;
                 }
                 forecastJsonStr = buffer.toString();
-                Log.d("mydebug",forecastJsonStr);
+                Log.d("mydebug", forecastJsonStr);
             } catch (IOException e) {
                 Log.e("PlaceholderFragment", "Error ", e);
                 return null;
-            } finally{
+            } finally {
                 if (urlConnection != null) {
                     urlConnection.disconnect();
                 }
@@ -586,12 +660,14 @@ public class PlayerActivity extends AppCompatActivity {
             return forecastJsonStr;
         }
     }
-    public class setImage extends AsyncTask<URL,Void,Bitmap>{
+
+    public class setImage extends AsyncTask<URL, Void, Bitmap> {
 
         @Override
         protected Bitmap doInBackground(URL... params) {
             try {
                 Bitmap image = BitmapFactory.decodeStream(params[0].openConnection().getInputStream());
+                Constant.artistImage = image;
                 return image;
             } catch (IOException e) {
                 e.printStackTrace();
@@ -602,10 +678,12 @@ public class PlayerActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Bitmap bitmap) {
-                super.onPostExecute(bitmap);
-            roundImage= new RoundImage(bitmap);
+            super.onPostExecute(bitmap);
+            roundImage = new RoundImage(bitmap);
+
             image.setImageDrawable(roundImage);
         }
     }
+
 
 }

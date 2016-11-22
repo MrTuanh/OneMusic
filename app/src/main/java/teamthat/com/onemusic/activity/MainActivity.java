@@ -18,7 +18,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -48,7 +47,6 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     // urls to load navigation header background image
     // and profile image
     private static final String urlNavHeaderBg = "http://www.free-video-footage.com/static2/preview100/stock-video-free-music-video-background-011-51544.jpg";
-    private static final String urlProfileImg = "https://cdn3.iconfinder.com/data/icons/black-easy/512/535106-user_512x512.png";
 
     // index to identify current nav menu item
     public static int navItemIndex = 0;
@@ -87,6 +85,13 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         }
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         navigationView = (NavigationView) findViewById(R.id.nav_view);
+        Menu menu = navigationView.getMenu();
+        if(isLogin())
+        menu.findItem(R.id.nav_login).setTitle("Đăng xuất");
+        else
+            menu.findItem(R.id.nav_login).setTitle("Đăng nhập");
+
+
 
 
         // Navigation view header
@@ -269,11 +274,24 @@ try {
                         return true;
                     case R.id.nav_login:
                         // launch new intent instead of loading fragment
-                        startActivity(new Intent(MainActivity.this, LoginActivity.class));
-                        drawer.closeDrawers();
-                        finish();
-                        overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
-                        return true;
+                        Menu menu = navigationView.getMenu();
+                        if(isLogin()){
+                            Constant.editor.putString("Id","");
+                            Constant.editor.putString("Username","");
+                            Constant.editor.putString("Image","");
+                            Constant.editor.putString("Email","");
+                            Constant.editor.putString("Name","");
+                            Constant.editor.commit();
+                            menu.findItem(R.id.nav_login).setTitle("Đăng nhập");
+                            loadNavHeader();
+                        }else{
+                            startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                            drawer.closeDrawers();
+                            finish();
+                            overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+                            return true;
+                        }
+
                     default:
                         navItemIndex = 0;
                 }
@@ -351,19 +369,19 @@ try {
         }
         return true;
     }
-
+        public boolean isLogin(){
+            if(Constant.sharedPreferences.getString("Id","").equals("")){
+                return false;
+            }else{
+                return true;
+            }
+        }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_logout) {
-            Toast.makeText(getApplicationContext(), "Logout user!", Toast.LENGTH_LONG).show();
-            return true;
-        }
 
         return super.onOptionsItemSelected(item);
     }
