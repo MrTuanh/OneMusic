@@ -73,6 +73,7 @@ public class PlayerActivity extends AppCompatActivity {
     BoundService boundService;
     Bundle bundle;
     ImageView image;
+    LocalMusicActivity localMusicActivity;
     boolean h;
     public static final String ACTION_PLAY = "com.example.action.PLAY";
     /**
@@ -110,8 +111,7 @@ public class PlayerActivity extends AppCompatActivity {
             image.setImageDrawable(roundImage);
         }
         clickImgButton();
-        index = ArtistMusicActivity.index;
-        max = ArtistMusicActivity.max - 1;
+
         Intent it = getIntent();
         boolean t = false;
         h = false;
@@ -120,6 +120,12 @@ public class PlayerActivity extends AppCompatActivity {
         if (!h) {
             ibDowload.setEnabled(false);
             ibFavourite.setEnabled(false);
+            localMusicActivity = new LocalMusicActivity();
+
+            max = Constant.listsongLocal.size()-1;
+        }else{
+            index = ArtistMusicActivity.index;
+            max = ArtistMusicActivity.max;
         }
         boundService = new BoundService();
         intent = new Intent(PlayerActivity.this, BoundService.class);
@@ -194,8 +200,13 @@ public class PlayerActivity extends AppCompatActivity {
                 tvMaxTime.setText("00:00");
                 ibPlay.setImageResource(R.drawable.ic_pause);
                 int k = getIndexOfMusic(0, -1);
-                Constant.path = LoginActivity.LOGIN_API + ArtistMusicActivity.listMusic.get(k).getMusicPath();
-                Constant.name = ArtistMusicActivity.listMusic.get(k).getNameMusic();
+                if(h) {
+                    Constant.path = LoginActivity.LOGIN_API + ArtistMusicActivity.listMusic.get(k).getMusicPath();
+                    Constant.name = ArtistMusicActivity.listMusic.get(k).getNameMusic();
+                }else{
+                    Constant.path = Constant.listsongLocal.get(k).getMusicPath();
+                    Constant.name = Constant.listsongLocal.get(k).getNameMusic();
+                }
                 getSupportActionBar().setTitle(Constant.name);
                 Log.d("mydebug", "previous " + k + " = " + Constant.path);
                 if (isServiceRunning()) {
@@ -213,8 +224,13 @@ public class PlayerActivity extends AppCompatActivity {
                 ibPlay.setImageResource(R.drawable.ic_pause);
                 seekBar.setProgress(0);
                 int k = getIndexOfMusic(1, 1);
-                Constant.path = LoginActivity.LOGIN_API + ArtistMusicActivity.listMusic.get(k).getMusicPath();
-                Constant.name = ArtistMusicActivity.listMusic.get(k).getNameMusic();
+                if(h) {
+                    Constant.path = LoginActivity.LOGIN_API + ArtistMusicActivity.listMusic.get(k).getMusicPath();
+                    Constant.name = ArtistMusicActivity.listMusic.get(k).getNameMusic();
+                }else{
+                    Constant.path = Constant.listsongLocal.get(k).getMusicPath();
+                    Constant.name = Constant.listsongLocal.get(k).getNameMusic();
+                }
                 getSupportActionBar().setTitle(Constant.name);
                 Log.d("mydebug", "next " + k + " = " + Constant.path);
                 isPlayed = false;
@@ -413,15 +429,19 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     public int getIndexOfMusic(int k, int i) {
+        Log.d("local","getIndex k"+k +" i "+i);
+        if (Constant.index == max & k == 1) {
+            Log.d("local","index=max "+Constant.index +" max "+max);
+            Constant.index= 0;
 
-        if (index == max & k == 1) {
-            index = 0;
-        } else if (index == 0 & k == 0) {
-            index = max;
+        } else if (Constant.index == 0 & k == 0) {
+            Log.d("local","index=0 "+Constant.index);
+            Constant.index = max;
         } else {
-            index += i;
+            Log.d("local","nothing index "+Constant.index +" max "+max+" i "+i);
+            Constant.index += i;
         }
-        return index;
+        return Constant.index;
 
     }
 

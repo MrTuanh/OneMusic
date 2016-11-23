@@ -18,6 +18,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import teamthat.com.onemusic.activity.Constant;
 import teamthat.com.onemusic.fragment.Profile;
@@ -75,7 +77,8 @@ public class Util {
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,query);}
     public boolean changeName(final Context context, String userid, final String name){
-        String query = makechangeNameStatement(userid,name);
+        String query = makechangeNameStatement(userid,name).replaceAll(" ","%20");
+
         Log.d("profile","query "+query+" \n name "+name);
 
 //        this.context = context;
@@ -94,9 +97,44 @@ public class Util {
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,query);
         return t;
     }
+    public boolean changePassword(final Context context, String userid, final String password){
+        String query = makeChangePasswordStateent(userid,password);
+        Log.d("profile","query "+query+" \n name "+password);
+        if(containsWhiteSpace(password)){
+            Toast.makeText(context,"Password không được chứa khoảng trắng",Toast.LENGTH_LONG).show();
+            return false;
+        }
+
+//        this.context = context;
+        new getJson(){
+            @Override
+            protected void onPostExecute(String s) {
+                super.onPostExecute(s);
+                Log.d("profile","json la "+s);
+                try {
+                    t= parseJsonChangeProfile(context,0,s,password);
+//                    if(!t){
+//                        Toast.makeText(context,"Sửa mật khẩu thành công ",Toast.LENGTH_LONG).show();
+//
+//                    }else{
+//                        Toast.makeText(context,"Sửa mật khẩu thất bại",Toast.LENGTH_LONG).show();
+//
+//                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    Toast.makeText(context,"Sửa mật khẩu thất bại ",Toast.LENGTH_LONG).show();
+                    t=false;
+                }
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,query);
+        return t;
+    }
     public boolean changeUsername(final Context context, String userid, final String username){
         String query = makechangeUserNameStatement(userid,username);
-
+        if(containsWhiteSpace(username)){
+            Toast.makeText(context,"Tên đăng nhập không được chứa khoảng trắng",Toast.LENGTH_LONG).show();
+            return false;
+        }
         new getJson(){
             @Override
             protected void onPostExecute(String s) {
@@ -113,7 +151,10 @@ public class Util {
     }
     public boolean changeEmail(final Context context, String userid, final String email){
        String query = makechangeEmailStatement(userid,email);
-
+        if(!isEmailValid(email)){
+            Toast.makeText(context,"Email không đúng định dạng",Toast.LENGTH_LONG).show();
+            return false;
+        }
         new getJson(){
             @Override
             protected void onPostExecute(String s) {
@@ -149,6 +190,9 @@ public class Util {
                 case 2:
                     Constant.editor.putString("Username",text);
 
+                    break;
+                case 3:
+                    Constant.editor.putString("Password",text);
                     break;
                 default:
                     break;
@@ -197,6 +241,12 @@ public class Util {
         StringBuilder builder = new StringBuilder(Constant.CHANGEEMAIL_API);
         builder.append("&id=").append(userid);
         builder.append("&email=").append(email);
+        return builder.toString();
+    }
+    public String makeChangePasswordStateent(String userid,String password){
+        StringBuilder builder = new StringBuilder(Constant.CHANGEPASSWORD_API);
+        builder.append("&id=").append(userid);
+        builder.append("&password=").append(password);
         return builder.toString();
     }
     public Boolean parseJsonCheckFavorite(String json) throws JSONException {
@@ -340,5 +390,27 @@ public class Util {
 
     }
 
+    public static boolean containsWhiteSpace(final String testCode){
+        if(testCode != null){
+            for(int i = 0; i < testCode.length(); i++){
+                if(Character.isWhitespace(testCode.charAt(i))){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    public static boolean isEmailValid(String email) {
+        boolean isValid = false;
 
+        String expression = "^[\\w\\.-]+@([\\w\\-]+\\.)+[A-Z]{2,4}$";
+        CharSequence inputStr = email;
+
+        Pattern pattern = Pattern.compile(expression, Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(inputStr);
+        if (matcher.matches()) {
+            isValid = true;
+        }
+        return isValid;
+    }
 }

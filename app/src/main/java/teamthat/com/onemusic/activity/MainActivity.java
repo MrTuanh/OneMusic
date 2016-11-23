@@ -140,12 +140,14 @@ try {
 
         // Loading profile image
         try {
+            if(!Constant.sharedPreferences.getString("Image","").equals(""))
             Glide.with(this).load(LoginActivity.LOGIN_API + Constant.sharedPreferences.getString("Image",""))
                     .crossFade()
                     .thumbnail(0.5f)
                     .bitmapTransform(new CircleTransform(this))
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .into(Constant.imgAvatar);
+
         }catch(NullPointerException e){
             Log.d("mydebug", "user null");
         }
@@ -281,6 +283,22 @@ try {
                             Constant.editor.putString("Email","");
                             Constant.editor.putString("Name","");
                             Constant.editor.commit();
+                            try {
+//                            if(Constant.edPassword!=null){
+                                Constant.edPassword.setText("");
+//                            }
+//                            if(Constant.edEmail!=null){
+                                Constant.edEmail.setText("");
+//                            }
+//                            if(Constant.edName!=null){
+                                Constant.edName.setText("");
+//                            }
+//                            if(Constant.edUsername!=null){
+                                Constant.edUsername.setText("");
+//                            }
+//                            if(Constant.imgAvatar!=null){
+                                Constant.imgAvartar1.setImageDrawable(getResources().getDrawable(R.drawable.account));
+                            }catch (NullPointerException e){}
                             menu.findItem(R.id.nav_login).setTitle("Đăng nhập");
                             loadNavHeader();
                         }else{

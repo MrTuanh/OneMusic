@@ -10,8 +10,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import teamthat.com.onemusic.R;
+import teamthat.com.onemusic.activity.Constant;
 import teamthat.com.onemusic.activity.FavouriteMusicActivity;
 import teamthat.com.onemusic.activity.LocalArtist;
 
@@ -105,12 +107,16 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View view) {
                // startActivity(new Intent(getActivity(), Profile.class));
-                Profile fragment = new Profile();
-                FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
-                fragmentTransaction.setCustomAnimations(android.R.anim.fade_in,
-                        android.R.anim.fade_out);
-                fragmentTransaction.replace(R.id.frame, fragment, CURRENT_TAG);
-                fragmentTransaction.commitAllowingStateLoss();
+                if(Constant.sharedPreferences.getString("Id","").equals("")){
+                    Toast.makeText(getContext(),"Bạn phải đăng nhập để xem được profile",Toast.LENGTH_LONG).show();
+                }else {
+                    Profile fragment = new Profile();
+                    FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+                    fragmentTransaction.setCustomAnimations(android.R.anim.fade_in,
+                            android.R.anim.fade_out);
+                    fragmentTransaction.replace(R.id.frame, fragment, CURRENT_TAG);
+                    fragmentTransaction.commitAllowingStateLoss();
+                }
             }
         });
     }

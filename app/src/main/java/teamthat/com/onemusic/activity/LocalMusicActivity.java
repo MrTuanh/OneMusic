@@ -4,23 +4,22 @@ package teamthat.com.onemusic.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import java.util.ArrayList;
-
 import teamthat.com.onemusic.DatabaseHelper.DatabaseHelper;
 import teamthat.com.onemusic.R;
-import teamthat.com.onemusic.model.ArtistMusic;
 
 public class LocalMusicActivity extends AppCompatActivity {
     ListView listView;
-    ArrayList<ArtistMusic> listSongs;
+
     ArrayAdapter adapter;
     DatabaseHelper databaseHelper;
+    int index,max;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,17 +29,20 @@ public class LocalMusicActivity extends AppCompatActivity {
 
         listView = (ListView) findViewById(R.id.listview);
         databaseHelper = new DatabaseHelper(this);
-        listSongs = new ArrayList<>();
+
         getlistAritst(id);
-        adapter = new ArrayAdapter(this,android.R.layout.simple_list_item_1,listSongs);
+        adapter = new ArrayAdapter(this,android.R.layout.simple_list_item_1,Constant.listsongLocal);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Constant.path = listSongs.get(position).getMusicPath();
+                Constant.path = Constant.listsongLocal.get(position).getMusicPath();
 
                // index =i;
-                Constant.name = listSongs.get(position).getNameMusic();
+                Constant.name = Constant.listsongLocal.get(position).getNameMusic();
+
+                Constant.index = position;
+                Log.d("local","index "+index);
               //  artistMusic = listMusic.get(i);
               //  Constant.artist_image = ArtistFragment.artist.getImage();
                 Intent intent = new Intent(getApplicationContext(), PlayerActivity.class);
@@ -56,7 +58,10 @@ public class LocalMusicActivity extends AppCompatActivity {
     }
 
 public void getlistAritst(String id){
-    listSongs = databaseHelper.getAllSongOfArtist(id);
+    Constant.listsongLocal.removeAll(Constant.listsongLocal);
+    Constant.listsongLocal = databaseHelper.getAllSongOfArtist(id);
+    max = Constant.listsongLocal.size()-1;
+    Log.d("local","max "+max);
 
 }
     @Override

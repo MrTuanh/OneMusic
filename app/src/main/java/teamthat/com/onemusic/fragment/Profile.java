@@ -17,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -54,7 +55,7 @@ public class Profile extends DialogFragment {
     IntentFilter filter=new IntentFilter("setValue");
     RelativeLayout localBanner, favbanner, folderBanner;
 
-    ImageView imgAvatar;
+
     Button btChangeAvatar;
     AlertDialog.Builder alertDialog;
     LinearLayout linearLayout;
@@ -115,16 +116,16 @@ public class Profile extends DialogFragment {
         Constant.edPassword = (EditText) rootView.findViewById(edPassword);
 
         Constant. edUsername = (EditText) rootView.findViewById(R.id.edUsername);
-        imgAvatar = (ImageView) rootView.findViewById(R.id.avatar);
+        Constant.imgAvartar1 = (ImageView) rootView.findViewById(R.id.avatar);
         btChangeAvatar = (Button) rootView.findViewById(R.id.edImage);
        setValue();
-        if(!Constant.sharedPreferences.getString("Phone","").equals(""))
+        if(!Constant.sharedPreferences.getString("Image","").equals(""))
             Glide.with(this).load(LoginActivity.LOGIN_API + Constant.sharedPreferences.getString("Image",""))
                     .crossFade()
                     .thumbnail(0.5f)
                     .bitmapTransform(new CircleTransform(getActivity()))
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .into(imgAvatar);
+                    .into(Constant.imgAvartar1);
         btChangeAvatar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -156,6 +157,14 @@ public class Profile extends DialogFragment {
                 return true;
             }
         });
+        Constant.edPassword.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(event.getAction()==MotionEvent.ACTION_DOWN)
+                    showDialog(v.getContext(),3);
+                return false;
+            }
+        });
 
         return rootView;}
 
@@ -170,12 +179,14 @@ public class Profile extends DialogFragment {
         Constant.txtEmail.setText(Constant.sharedPreferences.getString("Email",""));
         Constant.txtName.setText(Constant.sharedPreferences.getString("Name",""));
 
+
     }
     public void showDialog(final Context context,final int index){
         linearLayout = new LinearLayout(context);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
         editText= new EditText(context);
         alertDialog = new AlertDialog.Builder(context);
+
         linearLayout.addView(editText);
         alertDialog.setView(linearLayout);
         switch (index){
@@ -188,7 +199,13 @@ public class Profile extends DialogFragment {
             case 2:
                 alertDialog.setTitle("Sửa Tên đăng nhập");
                 break;
+            case 3:
+                editText.setInputType(EditorInfo.TYPE_TEXT_VARIATION_PASSWORD);
+                alertDialog.setTitle("Nhập lại mật khẩu");
+                break;
             default:
+                editText.setInputType(EditorInfo.TYPE_TEXT_VARIATION_PASSWORD);
+                alertDialog.setTitle("Nhập mật khẩu mới");
                 break;
         }
 
@@ -205,22 +222,36 @@ public class Profile extends DialogFragment {
                     case 0:
 
                             Log.d("profile",editText.getText().toString());
-                           boolean t= util.changeName(context,Constant.sharedPreferences.getString("Id",""),editText.getText().toString());
+                          util.changeName(context,Constant.sharedPreferences.getString("Id",""),editText.getText().toString());
 
 
                         break;
                     case 1:
-                       t=  util.changeEmail(context,Constant.sharedPreferences.getString("Id",""),editText.getText().toString());
+                       util.changeEmail(context,Constant.sharedPreferences.getString("Id",""),editText.getText().toString());
 
                         break;
                     case 2:
-                        t=  util.changeUsername(context,Constant.sharedPreferences.getString("Id",""),editText.getText().toString());
+                       util.changeUsername(context,Constant.sharedPreferences.getString("Id",""),editText.getText().toString());
 
 
                         break;
-                    default:
+                    case 3:
+                           if(editText.getText().toString().equals("")){
+                               Toast.makeText(context,"Không được để trống trường mật khẩu",Toast.LENGTH_LONG).show();
+                           } else if(!editText.getText().toString().equals(Constant.sharedPreferences.getString("Password",""))){
+                               Toast.makeText(context,"Mật khẩu không khớp",Toast.LENGTH_LONG).show();}
+                            else{
+                             //  Toast.makeText(context,"Sẵn sàng để sửa mật khẩu",Toast.LENGTH_LONG).show();
+                               showDialog(context,4);
 
+                           }
+                                Log.d("profile2","mk moi "+editText.getText()+"mk cu "+Constant.sharedPreferences.getString("Password",""));
                         break;
+                    case 4:
+                        util.changePassword(context,Constant.sharedPreferences.getString("Id",""),editText.getText().toString());
+
+                        //  Toast.makeText(context,"chinh mat khau moi",Toast.LENGTH_LONG).show();
+
 
                 }
 

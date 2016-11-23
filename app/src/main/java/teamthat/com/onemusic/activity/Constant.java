@@ -23,6 +23,7 @@ public class Constant {
     public static String CHANGENAME_API = "http://nghiahoang.net/api/appmusic/?function=updatename";
     public static String CHANGEUSERNAME_API = "http://nghiahoang.net/api/appmusic/?function=updateusername";
     public static String CHANGEEMAIL_API = "http://nghiahoang.net/api/appmusic/?function=updateemail";
+    public static String CHANGEPASSWORD_API = "http://nghiahoang.net/api/appmusic/?function=updatepassword";
     public static ArrayList<ArtistMusic> listfavoriteSong= new ArrayList<>();
 
     public  static long a;
@@ -41,5 +42,7 @@ public class Constant {
     public static SharedPreferences.Editor editor;
     public static EditText edName,edEmail,edUsername,edPassword;
     public static TextView txtName,txtEmail;
-    public static ImageView imgAvatar;
+    public static ImageView imgAvatar,imgAvartar1;
+    public static ArrayList<ArtistMusic> listsongLocal= new ArrayList<>();
+    public static int index;
 }
