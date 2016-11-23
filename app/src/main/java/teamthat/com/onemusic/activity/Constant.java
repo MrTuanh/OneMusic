@@ -44,5 +44,9 @@ public class Constant {
     public static TextView txtName,txtEmail;
     public static ImageView imgAvatar,imgAvartar1;
     public static ArrayList<ArtistMusic> listsongLocal= new ArrayList<>();
+    public static ArtistMusic artistMusic = new ArtistMusic();
     public static int index;
+    public static boolean Ramdom;
+    public static int type;
+    public static int isHome;
 }

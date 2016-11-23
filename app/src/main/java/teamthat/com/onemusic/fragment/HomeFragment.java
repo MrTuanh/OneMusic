@@ -16,7 +16,9 @@ import teamthat.com.onemusic.R;
 import teamthat.com.onemusic.activity.Constant;
 import teamthat.com.onemusic.activity.FavouriteMusicActivity;
 import teamthat.com.onemusic.activity.LocalArtist;
+import teamthat.com.onemusic.activity.LocalMusicActivity;
 
+import static teamthat.com.onemusic.R.id.folderBanner;
 import static teamthat.com.onemusic.activity.MainActivity.CURRENT_TAG;
 
 /**
@@ -32,7 +34,7 @@ public class HomeFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-    RelativeLayout localBanner, favbanner, folderBanner;
+    RelativeLayout localBanner, favbanner, profileBanner,downloadBanner;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -76,21 +78,23 @@ public class HomeFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_home,container, false);
-        localBanner = (RelativeLayout) rootView.findViewById(R.id.localBanner);
+        localBanner =(RelativeLayout) rootView.findViewById(R.id.localBanner);
+        downloadBanner = (RelativeLayout) rootView.findViewById(R.id.downloadBanner);
         favbanner = (RelativeLayout) rootView.findViewById(R.id.favbanner);
-        folderBanner = (RelativeLayout) rootView.findViewById(R.id.folderBanner);
+        profileBanner = (RelativeLayout) rootView.findViewById(folderBanner);
         intentScreen();
+
 
 
         return rootView;
     }
 
     private void intentScreen() {
-        // Local Music
+        // Local
         localBanner.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(getActivity(), LocalArtist.class));
+                startActivity(new Intent(getActivity(), LocalMusicActivity.class));
             }
         });
 
@@ -98,17 +102,21 @@ public class HomeFragment extends Fragment {
         favbanner.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(getActivity(), FavouriteMusicActivity.class));
+                if(Constant.sharedPreferences.getString("Id","").equals("")){
+                    Toast.makeText(getContext(),"Vui lòng đăng nhập để xem Favourite",Toast.LENGTH_LONG).show();
+                }else {
+                    startActivity(new Intent(getActivity(), FavouriteMusicActivity.class));
+                }
             }
         });
 
-        // Folder Music
-        folderBanner.setOnClickListener(new View.OnClickListener() {
+        // Profile
+        profileBanner.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                // startActivity(new Intent(getActivity(), Profile.class));
                 if(Constant.sharedPreferences.getString("Id","").equals("")){
-                    Toast.makeText(getContext(),"Bạn phải đăng nhập để xem được profile",Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(),"Vui lòng đăng nhập để xem Profile",Toast.LENGTH_LONG).show();
                 }else {
                     Profile fragment = new Profile();
                     FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
@@ -117,6 +125,14 @@ public class HomeFragment extends Fragment {
                     fragmentTransaction.replace(R.id.frame, fragment, CURRENT_TAG);
                     fragmentTransaction.commitAllowingStateLoss();
                 }
+            }
+        });
+
+        // download
+        downloadBanner.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(getActivity(), LocalArtist.class));
             }
         });
     }

@@ -2,10 +2,13 @@ package teamthat.com.onemusic.activity;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -25,9 +28,19 @@ ListView listfavorite;
         listfavorite = (ListView) findViewById(R.id.listfavorite);
         listfavorite.setAdapter(adapter);
         adapter.notifyDataSetChanged();
-//        Util util = new Util();
-//        //util.showDialog(this);
-//        util.loadFavorite(adapter);
+        Constant.type=2;
+        listfavorite.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Constant.name = Constant.listfavoriteSong.get(position).getNameMusic();
+                Constant.path =LoginActivity.LOGIN_API+Constant.listfavoriteSong.get(position).getMusicPath();
+                Log.d("favorite","path "+Constant.path);
+                Intent intent = new Intent(FavouriteMusicActivity.this,PlayerActivity.class);
+                intent.putExtra("name",true);
+                Constant.index = position;
+                startActivity(intent);
+            }
+        });
 
 
     }

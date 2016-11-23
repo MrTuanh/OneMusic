@@ -2,11 +2,14 @@ package teamthat.com.onemusic.activity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -57,6 +60,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        tvSinup.setPaintFlags(tvSinup.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
         tvSinup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -64,6 +68,16 @@ public class LoginActivity extends AppCompatActivity {
                 startActivityForResult(intent, REQUEST_SIGNUP);
                 finish();
               //  overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+            }
+        });
+        edtPassword.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+                if (i == EditorInfo.IME_ACTION_DONE) {
+                    login();
+                    return true;
+                }
+                return false;
             }
         });
     }
@@ -198,6 +212,7 @@ public class LoginActivity extends AppCompatActivity {
       // This method to get json from server
         public String makeLoginUrl(String email,String password) {
             String data = null;
+            Log.d("mydebug","make login url");
             try {
                 data = URLEncoder.encode("dnjson", "UTF-8")
                         + "=" + URLEncoder.encode("", "UTF-8");
@@ -209,7 +224,7 @@ public class LoginActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-
+            Log.d("mydebug","get duoc url "+data);
 
 
             String text = "";
@@ -256,6 +271,7 @@ public class LoginActivity extends AppCompatActivity {
         protected void onPreExecute() {
             super.onPreExecute();
             progressDialog.show();
+            Log.d("mydebug","proexcute");
         }
 
         @Override

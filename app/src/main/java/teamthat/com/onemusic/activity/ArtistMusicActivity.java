@@ -57,6 +57,7 @@ public class ArtistMusicActivity extends AppCompatActivity {
         String imgArtist1 = bundle.getString("image");
         String id = bundle.getString("id");
         Constant.artist_id=id;
+        Constant.type=1;
         String name= bundle.getString("name");
         getSupportActionBar().setTitle(name);
         Picasso.with(this).load(LOGIN_API+imgArtist1).into(imgArtist);
@@ -177,12 +178,14 @@ public class ArtistMusicActivity extends AppCompatActivity {
                 Constant.music_id = listMusic.get(i).getId();
                 index =i;
                 Constant.name = listMusic.get(i).getNameMusic();
-                artistMusic = listMusic.get(i);
+                Constant.artistMusic = listMusic.get(i);
                 Constant.artist_image = ArtistFragment.artist.getImage();
                 Intent intent = new Intent(getApplicationContext(), PlayerActivity.class);
 
                 intent.putExtra("name",true);
                 intent.putExtra("online",true);
+                intent.putExtra("type","artistmusic");
+
 
                 startActivity(intent);
             }

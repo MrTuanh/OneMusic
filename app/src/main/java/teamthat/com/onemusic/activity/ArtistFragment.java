@@ -93,19 +93,10 @@ public class ArtistFragment extends Fragment {
 
            mygetallartist.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,GET_ALL_ARTIST_API);
         }else{
-            Toast.makeText(getActivity().getApplicationContext(),"Khong co ket noi mang",Toast.LENGTH_SHORT).show();
-
-
+            Toast.makeText(getActivity().getApplicationContext(),"Không có kết nối mạng",Toast.LENGTH_SHORT).show();
 
         }
-
-
     }
-
-
-
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -156,8 +147,11 @@ public class ArtistFragment extends Fragment {
 //            throw new RuntimeException(context.toString()
 //                    + " must implement OnFragmentInteractionListener");
 //        }
-       dialog = ProgressDialog.show(context, "",
-                "Loading. Please wait...", true);
+//       dialog = ProgressDialog.show(context, "",
+//                "Loading...", true);
+        dialog = new ProgressDialog(getActivity(),R.style.AppTheme_Dark_Dialog);
+        dialog.setIndeterminate(true);
+        dialog.setMessage("Loading...");
     }
 
     @Override
@@ -251,8 +245,6 @@ public class ArtistFragment extends Fragment {
                     publishProgress(artist);
 
                 }
-
-
 
             }catch (JSONException e){
                 e.printStackTrace();

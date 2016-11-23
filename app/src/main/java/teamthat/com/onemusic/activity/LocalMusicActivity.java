@@ -1,74 +1,93 @@
 package teamthat.com.onemusic.activity;
 
-
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
-import teamthat.com.onemusic.DatabaseHelper.DatabaseHelper;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+
 import teamthat.com.onemusic.R;
+import teamthat.com.onemusic.adapter.SongAdapter;
+import teamthat.com.onemusic.model.Song;
+
+/**
+ * Created by thietit on 11/24/2016.
+ */
 
 public class LocalMusicActivity extends AppCompatActivity {
-    ListView listView;
 
-    ArrayAdapter adapter;
-    DatabaseHelper databaseHelper;
-    int index,max;
+    private ArrayList<Song> songList;
+    private ListView songView;
+    SongAdapter songAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_local_music);
-        Intent intent = getIntent();
-        String id = intent.getStringExtra("id");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        listView = (ListView) findViewById(R.id.listview);
-        databaseHelper = new DatabaseHelper(this);
-
-        getlistAritst(id);
-        adapter = new ArrayAdapter(this,android.R.layout.simple_list_item_1,Constant.listsongLocal);
-        listView.setAdapter(adapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Constant.path = Constant.listsongLocal.get(position).getMusicPath();
-
-               // index =i;
-                Constant.name = Constant.listsongLocal.get(position).getNameMusic();
-
-                Constant.index = position;
-                Log.d("local","index "+index);
-              //  artistMusic = listMusic.get(i);
-              //  Constant.artist_image = ArtistFragment.artist.getImage();
-                Intent intent = new Intent(getApplicationContext(), PlayerActivity.class);
-
-                intent.putExtra("name",true);
-                intent.putExtra("online",false);
-
-                startActivity(intent);
+        songView = (ListView)findViewById(R.id.list_local);
+        //instantiate list
+        songList = new ArrayList<Song>();
+        //get songs from device
+        getSongList();
+        //sort alphabetically by title
+        Collections.sort(songList, new Comparator<Song>(){
+            public int compare(Song a, Song b){
+                return a.getTitle().compareTo(b.getTitle());
             }
         });
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //create and set adapter
+        songAdapter = new SongAdapter(getApplicationContext(), R.layout.song, songList);
+        songView.setAdapter(songAdapter);
+        songAdapter.notifyDataSetChanged();
+
+        songView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int positions, long l) {
+                Toast.makeText(getApplicationContext(),positions + "" , Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
-public void getlistAritst(String id){
-    Constant.listsongLocal.removeAll(Constant.listsongLocal);
-    Constant.listsongLocal = databaseHelper.getAllSongOfArtist(id);
-    max = Constant.listsongLocal.size()-1;
-    Log.d("local","max "+max);
+    public void getSongList(){
+        //query external audio
+        ContentResolver musicResolver = getContentResolver();
+        Uri musicUri = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        Cursor musicCursor = musicResolver.query(musicUri, null, null, null, null);
+        //iterate over results if valid
+        if(musicCursor!=null && musicCursor.moveToFirst()){
+            //get columns
+            int titleColumn = musicCursor.getColumnIndex
+                    (android.provider.MediaStore.Audio.Media.TITLE);
+            int idColumn = musicCursor.getColumnIndex
+                    (android.provider.MediaStore.Audio.Media._ID);
+            int artistColumn = musicCursor.getColumnIndex
+                    (android.provider.MediaStore.Audio.Media.ARTIST);
+            //add songs to list
+            do {
+                long thisId = musicCursor.getLong(idColumn);
+                String thisTitle = musicCursor.getString(titleColumn);
+                String thisArtist = musicCursor.getString(artistColumn);
+                songList.add(new Song(thisId, thisTitle, thisArtist));
+            }
+            while (musicCursor.moveToNext());
+        }
+    }
 
-}
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
@@ -79,5 +98,13 @@ public void getlistAritst(String id){
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        startActivity(new Intent(getApplicationContext(), MainActivity.class));
+        finish();
+       // overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+        super.onBackPressed();
     }
 }

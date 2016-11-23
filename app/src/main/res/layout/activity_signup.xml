@@ -29,7 +29,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPersonName"
-                android:hint="Họ tên" />
+                android:hint="Họ tên"
+                android:textColor="@color/black"/>
         </android.support.design.widget.TextInputLayout>
 
         <!-- Address Label -->
@@ -42,7 +43,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
-                android:hint="Tên đăng nhập" />
+                android:hint="Tên đăng nhập"
+                android:textColor="@color/black"/>
         </android.support.design.widget.TextInputLayout>
 
         <!--  Email Label -->
@@ -55,7 +57,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textEmailAddress"
-                android:hint="Email" />
+                android:hint="Email"
+                android:textColor="@color/black"/>
         </android.support.design.widget.TextInputLayout>
 
         <!-- Password Label -->
@@ -68,7 +71,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
-                android:hint="Mật khẩu"/>
+                android:hint="Mật khẩu"
+                android:textColor="@color/black"/>
         </android.support.design.widget.TextInputLayout>
 
         <!-- Password Re-enter Label -->
@@ -81,7 +85,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
-                android:hint="Nhập lại mật khẩu"/>
+                android:hint="Nhập lại mật khẩu"
+                android:textColor="@color/black"/>
         </android.support.design.widget.TextInputLayout>
 
 
@@ -99,9 +104,11 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="24dp"
-            android:text="Đã là thành viên? Đăng nhập"
+            android:text="@string/text_login"
             android:gravity="center"
-            android:textSize="16dip"/>
+            android:textSize="16dip"
+            android:textStyle="italic"
+            android:textColor="@color/monsoon"/>
 
     </LinearLayout>
 </ScrollView>

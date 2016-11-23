@@ -94,7 +94,14 @@
             android:orientation="horizontal">
 
             <ImageButton
+                android:id="@+id/ib_random"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_random_black_48dp" />
 
+            <ImageButton
                 android:id="@+id/ib_favourite"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -111,12 +118,12 @@
                 android:src="@drawable/ic_download" />
 
             <ImageButton
-                android:id="@+id/ib_emotion"
+                android:id="@+id/ib_repeat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@android:color/transparent"
-                android:src="@drawable/ic_list_music" />
+                android:src="@drawable/ic_repeat1_black_48dp" />
 
         </LinearLayout>
     </LinearLayout>

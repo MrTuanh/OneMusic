@@ -136,8 +136,7 @@ public class SplashActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             if (!perm2 && perm1) {
                 ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.RECORD_AUDIO},
-                        1);
+                        new String[]{Manifest.permission.RECORD_AUDIO},1);
             }
         } else {
             perm2 = true;

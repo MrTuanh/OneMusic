@@ -71,8 +71,9 @@ public class BoundService extends Service implements MediaPlayer.OnPreparedListe
 
     @Override
     public void onDestroy() {
-        Log.d("mydebug","destroy service");
+        Log.d("ramdom","destroy service");
         if(mediaPlayer!=null){
+
             mediaPlayer.release();
         }
 
@@ -83,6 +84,7 @@ public class BoundService extends Service implements MediaPlayer.OnPreparedListe
         mudapteProgress.cancel(true);
         stopForeground(true);
         super.onDestroy();
+
     }
 
     @Nullable
@@ -226,10 +228,20 @@ public class BoundService extends Service implements MediaPlayer.OnPreparedListe
             while(t){
                 // playerActivity.SetProgress(mp[0].getCurrentPosition());
                 publishProgress(mp[0].getCurrentPosition());
+                Log.d("ramdom","=="+mp[0].getCurrentPosition()+"/"+mp[0].getDuration());
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
+                }
+                if(mp[0].getDuration()-mp[0].getCurrentPosition()<=100) {
+
+                    Log.d("ramdom","da ket thuc nhac "+mp[0].getCurrentPosition()+"/"+mp[0].getDuration());
+                    Intent intent = new Intent();
+                    intent.setAction("Finish");
+                    sendBroadcast(intent);
+
+
                 }
             }
              return null;

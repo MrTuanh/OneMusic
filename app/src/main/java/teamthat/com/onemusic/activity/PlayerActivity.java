@@ -4,8 +4,10 @@ import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
@@ -43,6 +45,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Random;
 
 import teamthat.com.onemusic.DatabaseHelper.DatabaseHelper;
 import teamthat.com.onemusic.R;
@@ -56,7 +59,7 @@ import teamthat.com.onemusic.model.ArtistMusic;
 
 public class PlayerActivity extends AppCompatActivity {
     int i, j = 0;
-    ImageButton ibPlay, ibPrevious, ibNext, ibFavourite, ibDowload;
+    ImageButton ibPlay, ibPrevious, ibNext, ibFavourite, ibDowload,ibRamdom;
     static SeekBar seekBar;
     static TextView tvMinTime, tvMaxTime;
     RoundImage roundImage;
@@ -68,12 +71,14 @@ public class PlayerActivity extends AppCompatActivity {
     int max;
     boolean m = true;
     setImage setImage;
+
     boolean isPlayed = false;
     Intent intent;
     BoundService boundService;
     Bundle bundle;
     ImageView image;
-    LocalMusicActivity localMusicActivity;
+    DownloadMusicActivity downloadMusicActivity;
+    BroadcastReceiver broadcastReceiver;
     boolean h;
     public static final String ACTION_PLAY = "com.example.action.PLAY";
     /**
@@ -89,10 +94,11 @@ public class PlayerActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         addCtrols();
         setImage = new setImage();
+
         databaseHelper = new DatabaseHelper(PlayerActivity.this);
         final ConnectivityManager connectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
         final NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        if (networkInfo != null&networkInfo.isConnected()) {
+        if (networkInfo != null&networkInfo.isConnected()&Constant.type==1) {
           //  Log.d("mydebug","co mang "+networkInfo.isConnected());
             try {
                 URL url = new URL(LoginActivity.LOGIN_API + Constant.artist.getImage());
@@ -117,16 +123,25 @@ public class PlayerActivity extends AppCompatActivity {
         h = false;
         t = it.getBooleanExtra("name", false);
         h = it.getBooleanExtra("online", false);
-        if (!h) {
+
+        if (Constant.type==0) {
             ibDowload.setEnabled(false);
             ibFavourite.setEnabled(false);
-            localMusicActivity = new LocalMusicActivity();
+            downloadMusicActivity = new DownloadMusicActivity();
 
             max = Constant.listsongLocal.size()-1;
-        }else{
-            index = ArtistMusicActivity.index;
-            max = ArtistMusicActivity.max;
+        }else if(Constant.type==1){
+           Constant.index = ArtistMusicActivity.index;
+                max = ArtistMusicActivity.max;
+           }else if(Constant.type==2){
+            max = Constant.listfavoriteSong.size()-1;
+
         }
+        if(Constant.Ramdom)
+            ibRamdom.setImageResource(R.drawable.ic_random_red_48dp);
+        else
+            ibRamdom.setImageResource(R.drawable.ic_random_black_48dp);
+
         boundService = new BoundService();
         intent = new Intent(PlayerActivity.this, BoundService.class);
         intent.setAction(ACTION_PLAY);
@@ -135,11 +150,11 @@ public class PlayerActivity extends AppCompatActivity {
         // nếu chưa có service chạy, thì khởi tạo service
         Log.d("mydebug", "onCreate");
         if (isServiceRunning() & t) {
-            Log.d("mydebug", "chay lai service 1 " + isServiceRunning());
+            Log.d("favorite", "chay lai service 1 " + isServiceRunning());
             stopService(intent);
             startService(intent);
         } else {
-            Log.d("mydebug", "chay lai 2" + isServiceRunning() + " " + t);
+            Log.d("favorite", "chay lai 2" + isServiceRunning() + " " + t);
             startService(intent);
         }
         if (BoundService.mediaPlayer != null) {
@@ -158,13 +173,41 @@ public class PlayerActivity extends AppCompatActivity {
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("Finish");
+        broadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent1) {
+                Log.d("ramdom","nhan duoc thong bao");
+                if(Constant.Ramdom) {
+                    Random r = new Random();
+                    int k = r.nextInt(max+1);
+                    Log.d("ramdom","Random la "+k);
+                    getSong(k);
+                    getSupportActionBar().setTitle(Constant.name);
+                    stopService(intent);
+                    startService(intent);
+                }
+
+            }
+        };
+
+        try {
+            unregisterReceiver(broadcastReceiver);
+            registerReceiver(broadcastReceiver, intentFilter);
+        }catch (IllegalArgumentException e){
+
+
+        }
     }
+
     public void addCtrols() {
         ibPlay = (ImageButton) findViewById(R.id.ib_play);
         ibPrevious = (ImageButton) findViewById(R.id.ib_previous);
         ibNext = (ImageButton) findViewById(R.id.ib_next);
         ibFavourite = (ImageButton) findViewById(R.id.ib_favourite);
         ibDowload = (ImageButton) findViewById(R.id.ib_dowload);
+        ibRamdom = (ImageButton) findViewById(R.id.ib_random);
         seekBar = (SeekBar) findViewById(R.id.seekBar);
 
         tvMaxTime = (TextView) findViewById(R.id.tv_end);
@@ -199,14 +242,14 @@ public class PlayerActivity extends AppCompatActivity {
                 tvMinTime.setText("00:00");
                 tvMaxTime.setText("00:00");
                 ibPlay.setImageResource(R.drawable.ic_pause);
-                int k = getIndexOfMusic(0, -1);
-                if(h) {
-                    Constant.path = LoginActivity.LOGIN_API + ArtistMusicActivity.listMusic.get(k).getMusicPath();
-                    Constant.name = ArtistMusicActivity.listMusic.get(k).getNameMusic();
+                int k;
+                if(Constant.Ramdom){
+                    Random r = new Random();
+                    k = r.nextInt(max+1);
                 }else{
-                    Constant.path = Constant.listsongLocal.get(k).getMusicPath();
-                    Constant.name = Constant.listsongLocal.get(k).getNameMusic();
+                    k = getIndexOfMusic(0, -1);
                 }
+
                 getSupportActionBar().setTitle(Constant.name);
                 Log.d("mydebug", "previous " + k + " = " + Constant.path);
                 if (isServiceRunning()) {
@@ -223,14 +266,15 @@ public class PlayerActivity extends AppCompatActivity {
             public void onClick(View view) {
                 ibPlay.setImageResource(R.drawable.ic_pause);
                 seekBar.setProgress(0);
-                int k = getIndexOfMusic(1, 1);
-                if(h) {
-                    Constant.path = LoginActivity.LOGIN_API + ArtistMusicActivity.listMusic.get(k).getMusicPath();
-                    Constant.name = ArtistMusicActivity.listMusic.get(k).getNameMusic();
+                int k;
+                if(Constant.Ramdom){
+                    Random r = new Random();
+                   k = r.nextInt(max+1);
                 }else{
-                    Constant.path = Constant.listsongLocal.get(k).getMusicPath();
-                    Constant.name = Constant.listsongLocal.get(k).getNameMusic();
+                   k = getIndexOfMusic(1, 1);
                 }
+
+                getSong(k);
                 getSupportActionBar().setTitle(Constant.name);
                 Log.d("mydebug", "next " + k + " = " + Constant.path);
                 isPlayed = false;
@@ -267,6 +311,7 @@ public class PlayerActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Log.d("mydebug", "bam vao day");
                 Log.d("mydebug", "Constant hien tai la " + Constant.music_id);
+                Toast.makeText(getApplicationContext(), "Bam vao", Toast.LENGTH_SHORT).show();
                 if (databaseHelper.checkExistSong(Constant.music_id)) {
 
                     Toast.makeText(getApplicationContext(), "Bai hat da tai ve", Toast.LENGTH_SHORT).show();
@@ -291,8 +336,30 @@ public class PlayerActivity extends AppCompatActivity {
 
             }
         });
-    }
+        ibRamdom.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(Constant.Ramdom){
+                Constant.Ramdom = false;
+                ibRamdom.setImageResource(R.drawable.ic_random_black_48dp);
 
+                }else{
+                    Constant.Ramdom = true;
+                    ibRamdom.setImageResource(R.drawable.ic_random_red_48dp);
+
+                }
+            }
+        });
+    }
+public void getSong(int k){
+    if(Constant.type==1) {
+        Constant.path = LoginActivity.LOGIN_API + ArtistMusicActivity.listMusic.get(k).getMusicPath();
+        Constant.name = ArtistMusicActivity.listMusic.get(k).getNameMusic();
+    }else if(Constant.type==0){
+        Constant.path = Constant.listsongLocal.get(k).getMusicPath();
+        Constant.name = Constant.listsongLocal.get(k).getNameMusic();
+    }
+}
     @Override
     protected void onResume() {
         super.onResume();
@@ -440,6 +507,16 @@ public class PlayerActivity extends AppCompatActivity {
         } else {
             Log.d("local","nothing index "+Constant.index +" max "+max+" i "+i);
             Constant.index += i;
+        }
+        return Constant.index;
+
+    }
+    public int getRamdomIndexOfMusic(int k, int i) {
+        Log.d("local","getIndex k"+k +" i "+i);
+        switch (i){
+            case 0:
+                Constant.index = (int)(Math.random()*max);
+
         }
         return Constant.index;
 

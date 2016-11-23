@@ -39,4 +39,10 @@
     <string name="login">Login</string>
     <string name="nav_login">Đăng Nhập</string>
     <string name="my_name">Tú Anh</string>
+    <string name="skip">Bỏ qua</string>
+    <string name="user">Tên đăng nhập</string>
+    <string name="password">Mật khẩu</string>
+    <string name="text_signup">Chưa có tài khoản? Đăng kí.</string>
+    <string name="text_login">Đã là thành viên? Đăng nhập.</string>
+    <string name="download">Download</string>
 </resources>

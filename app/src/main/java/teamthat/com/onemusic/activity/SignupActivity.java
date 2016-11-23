@@ -2,11 +2,14 @@ package teamthat.com.onemusic.activity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -49,6 +52,7 @@ public class SignupActivity extends AppCompatActivity {
             }
         });
 
+        tvLogin.setPaintFlags(tvLogin.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
         tvLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -56,6 +60,16 @@ public class SignupActivity extends AppCompatActivity {
                 startActivity(intent);
                 finish();
               //  overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+            }
+        });
+        edtReEnterPassword.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+                if (i == EditorInfo.IME_ACTION_DONE) {
+                    signUp();
+                    return true;
+                }
+                return false;
             }
         });
     }

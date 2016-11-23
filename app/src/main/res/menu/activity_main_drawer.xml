@@ -8,7 +8,7 @@
             android:title="@string/nav_home" />
         <item
             android:id="@+id/nav_music_hot"
-            android:icon="@drawable/ic_chart_black_48dp"
+            android:icon="@drawable/ic_music_hot"
             android:title="@string/nav_music_hot" />
         <item
             android:id="@+id/nav_artist"

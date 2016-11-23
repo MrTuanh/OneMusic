@@ -109,6 +109,7 @@ public class Profile extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        Constant.isHome=0;
         View rootView = inflater.inflate(R.layout.activity_profile,container, false);
 
         Constant.edName = (EditText) rootView.findViewById(R.id.edName);
@@ -285,4 +286,6 @@ public class Profile extends DialogFragment {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
+
+
 }

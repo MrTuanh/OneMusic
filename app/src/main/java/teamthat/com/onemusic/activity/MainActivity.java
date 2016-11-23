@@ -29,6 +29,7 @@ import teamthat.com.onemusic.Util.Util;
 import teamthat.com.onemusic.fragment.HomeFragment;
 import teamthat.com.onemusic.fragment.MusicHotFragment;
 import teamthat.com.onemusic.fragment.MusicRankFragment;
+import teamthat.com.onemusic.fragment.Profile;
 import teamthat.com.onemusic.fragment.SettingsFragment;
 import teamthat.com.onemusic.model.User;
 import teamthat.com.onemusic.other.CircleTransform;
@@ -45,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
     // urls to load navigation header background image
     // and profile image
-    private static final String urlNavHeaderBg = "http://www.free-video-footage.com/static2/preview100/stock-video-free-music-video-background-011-51544.jpg";
+    private static final String urlNavHeaderBg = "";
 
     // index to identify current nav menu item
     public static int navItemIndex = 0;
@@ -56,6 +57,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     private static final String TAG_ARTIST = "artist";
     private static final String TAG_MUSIC_RANK = "musicRank";
     private static final String TAG_SETTINGS = "settings";
+    private static final String TAG_PROFILE = "profile";
     public static String CURRENT_TAG = TAG_HOME;
 
     // toolbar titles respected to selected nav menu item
@@ -65,23 +67,29 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     private boolean shouldLoadHomeFragOnBackPress = true;
     private Handler mHandler;
 
+    // Fragment
+    Fragment fragment;
+    FragmentTransaction fragmentTransaction;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setCurrentIndexScreen();
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         SplashActivity.user = new User();
         mHandler = new Handler();
-        if(!Constant.sharedPreferences.getString("Id","").equals("")){
+        if (Constant.sharedPreferences != null) {
+        if (!Constant.sharedPreferences.getString("Id", "").equals("")) {
             try {
                 Util util = new Util();
-                util.getAllFavoriteSong(Constant.sharedPreferences.getString("Id",""));
+                util.getAllFavoriteSong(Constant.sharedPreferences.getString("Id", ""));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
+    }
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         Menu menu = navigationView.getMenu();
@@ -105,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
 
         // load nav menu header data
-        loadNavHeader();
+        loadNavHeader(0);
 
         // initializing navigation menu
         setUpNavigationView();
@@ -118,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
     }
 
-    private void loadNavHeader() {
+    private void loadNavHeader(int i) {
         // name, email
 try {
     Constant.txtName.setText(Constant.sharedPreferences.getString("Name",""));
@@ -129,18 +137,8 @@ try {
 
 }
 
-
-
-
-        // loading header background image
-        Glide.with(this).load(urlNavHeaderBg)
-                .crossFade()
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .into(imgNavHeaderBg);
-
-        // Loading profile image
         try {
-            if(!Constant.sharedPreferences.getString("Image","").equals(""))
+            if(!Constant.sharedPreferences.getString("Image","").equals("")||i==1)
             Glide.with(this).load(LoginActivity.LOGIN_API + Constant.sharedPreferences.getString("Image",""))
                     .crossFade()
                     .thumbnail(0.5f)
@@ -178,8 +176,8 @@ try {
             @Override
             public void run() {
                 // update the main content by replacing fragments
-                Fragment fragment = getHomeFragment();
-                FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                 fragment = getHomeFragment();
+                 fragmentTransaction = getSupportFragmentManager().beginTransaction();
                 fragmentTransaction.setCustomAnimations(android.R.anim.fade_in,
                         android.R.anim.fade_out);
                 fragmentTransaction.replace(R.id.frame, fragment, CURRENT_TAG);
@@ -222,6 +220,10 @@ try {
                 //
                 SettingsFragment settingsFragment = new SettingsFragment();
                 return settingsFragment;
+            case 5:
+                //
+                Profile profile = new Profile();
+                return profile;
             default:
                 return new HomeFragment();
         }
@@ -300,7 +302,7 @@ try {
                                 Constant.imgAvartar1.setImageDrawable(getResources().getDrawable(R.drawable.account));
                             }catch (NullPointerException e){}
                             menu.findItem(R.id.nav_login).setTitle("Đăng nhập");
-                            loadNavHeader();
+                            loadNavHeader(1);
                         }else{
                             startActivity(new Intent(MainActivity.this, LoginActivity.class));
                             drawer.closeDrawers();
@@ -312,6 +314,13 @@ try {
                     default:
                         navItemIndex = 0;
                 }
+
+                fragment = getHomeFragment();
+                fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                fragmentTransaction.setCustomAnimations(android.R.anim.fade_in,
+                        android.R.anim.fade_out);
+                fragmentTransaction.replace(R.id.frame, fragment, CURRENT_TAG);
+                fragmentTransaction.commitAllowingStateLoss();
 
                 //Checking if the item is in checked state or not, if not make it in checked state
                 if (menuItem.isChecked()) {
@@ -350,8 +359,22 @@ try {
         actionBarDrawerToggle.syncState();
     }
 
+    // set man hình khởi chay dau
+    public void setCurrentIndexScreen(){
+        fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.setCustomAnimations(android.R.anim.fade_in,
+                android.R.anim.fade_out);
+        fragmentTransaction.replace(R.id.frame, new HomeFragment(), CURRENT_TAG);
+        fragmentTransaction.commitAllowingStateLoss();
+    }
+
     @Override
     public void onBackPressed() {
+       if(Constant.isHome==0){
+            setCurrentIndexScreen();
+           Constant.isHome=1;
+           return;
+       }
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawers();
             return;
@@ -387,7 +410,7 @@ try {
         return true;
     }
         public boolean isLogin(){
-            if(Constant.sharedPreferences.getString("Id","").equals("")){
+            if(Constant.sharedPreferences==null||Constant.sharedPreferences.getString("Id","").equals("")){
                 return false;
             }else{
                 return true;
