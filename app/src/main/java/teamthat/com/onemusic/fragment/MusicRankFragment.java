@@ -1,14 +1,23 @@
 package teamthat.com.onemusic.fragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 import teamthat.com.onemusic.R;
+import teamthat.com.onemusic.activity.Constant;
+import teamthat.com.onemusic.activity.LoginActivity;
+import teamthat.com.onemusic.activity.PlayerActivity;
+import teamthat.com.onemusic.model.Artist;
+import teamthat.com.onemusic.model.ArtistMusic;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -28,23 +37,17 @@ public class MusicRankFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    private OnFragmentInteractionListener mListener;
+    ListView lvMusicHot;
+    ArrayAdapter<ArtistMusic> adapter;
+
+    private MusicHotFragment.OnFragmentInteractionListener mListener;
 
     public MusicRankFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment MusicRankFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static MusicRankFragment newInstance(String param1, String param2) {
-        MusicRankFragment fragment = new MusicRankFragment();
+    public static MusicHotFragment newInstance(String param1, String param2) {
+        MusicHotFragment fragment = new MusicHotFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -64,8 +67,35 @@ public class MusicRankFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_music_rank, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_music_hot, container, false);
+        Constant.artist= new Artist();
+        Constant.artist.setName("Mặc định");
+        lvMusicHot = (ListView) rootView.findViewById(R.id.lv_musichot);
+
+        adapter = new ArrayAdapter<ArtistMusic>(getActivity(),android.R.layout.simple_list_item_1,Constant.listHotSong);
+        lvMusicHot.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
+        goToMusicHot();
+        return rootView;
+    }
+
+    public void goToMusicHot() {
+        lvMusicHot.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Constant.music_id=Constant.listHotSong.get(i).getId();
+                Constant.name = Constant.listHotSong.get(i).getNameMusic();
+                Constant.path = LoginActivity.LOGIN_API+Constant.listHotSong.get(i).getMusicPath();
+                Intent intent = new Intent(getActivity(), PlayerActivity.class);
+                intent.putExtra("name",true);
+                intent.putExtra("online",true);
+                intent.putExtra("type","hotmusic");
+                Constant.type=3;
+                Constant.index=i;
+                startActivity(intent);
+
+            }
+        });
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -92,16 +122,6 @@ public class MusicRankFragment extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);

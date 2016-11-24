@@ -1,7 +1,9 @@
 package teamthat.com.onemusic.Util;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ArrayAdapter;
@@ -21,9 +23,11 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import teamthat.com.onemusic.R;
 import teamthat.com.onemusic.activity.Constant;
 import teamthat.com.onemusic.fragment.Profile;
 import teamthat.com.onemusic.model.ArtistMusic;
+import teamthat.com.onemusic.model.User;
 
 /**
  * Created by ASUS on 11/20/2016.
@@ -32,6 +36,14 @@ import teamthat.com.onemusic.model.ArtistMusic;
 public class Util {
     ProgressDialog dialog;
     boolean t;
+    Activity context;
+    int a=0;
+    public Util(Activity activityCompat){
+        this.context = activityCompat;
+        dialog = new ProgressDialog(activityCompat, R.style.AppTheme_Dark_Dialog);
+        dialog.setIndeterminate(true);
+        dialog.setMessage("Loading...");
+    }
     public void dismissDialog(){
         dialog.dismiss();
     }
@@ -63,13 +75,88 @@ public class Util {
 
         return true;
     }
+    public Boolean getAllHotSong() throws JSONException {
+        String query = getAllSong();
+        Log.d("hotsong",query);
+        new getJson(){
+            @Override
+            protected void onPostExecute(String s) {
+                Log.d("hotsong",s);
+                super.onPostExecute(s);
+                try {
+                    parseAllHotSong(s);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,query);
+        Log.d("favorite","query la "+query);
+
+        return true;
+    }
+    public void Login(String username,String password) throws JSONException {
+        a =1;
+        String query = makeLoginStatement(username,password).replaceAll(" ","%20");;
+        new getJson(){
+            @Override
+            protected void onPostExecute(String s) {
+                super.onPostExecute(s);
+                dialog.dismiss();
+                try {
+                    Intent intent = new Intent();
+                  if(parseJsonLogin(s)) {
+
+                      intent.setAction("loginsucess");
+                  }else{
+                      intent.setAction("loginfailure");
+                  }
+                    context.sendBroadcast(intent);
+
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                   }
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,query);
+
+
+    }
+    public void SignUp(String username,String password,String email,String name) throws JSONException {
+        a =1;
+        String query = makeSignInStetement(username,password,name,email).replaceAll(" ","%20");;
+        new getJson(){
+            @Override
+            protected void onPostExecute(String s) {
+                super.onPostExecute(s);
+                dialog.dismiss();
+                try {
+                    Intent intent = new Intent();
+                    if(parseJsonLogin(s)) {
+
+                        intent.setAction("signinsucess");
+                    }else{
+                        intent.setAction("signinfailure");
+                    }
+                    context.sendBroadcast(intent);
+
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,query);
+
+
+    }
     public void getAllFavoriteSong(String userid) throws JSONException {
         String query = makeGetAllFavoriteSatement(userid);
+        Log.d("favorite",query);
         new getJson(){
             @Override
             protected void onPostExecute(String s) {
                 super.onPostExecute(s);
                 try {
+
                   parseJsonGetAllFavorited(s);
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -112,14 +199,7 @@ public class Util {
                 super.onPostExecute(s);
                 Log.d("profile","json la "+s);
                 try {
-                    t= parseJsonChangeProfile(context,0,s,password);
-//                    if(!t){
-//                        Toast.makeText(context,"Sửa mật khẩu thành công ",Toast.LENGTH_LONG).show();
-//
-//                    }else{
-//                        Toast.makeText(context,"Sửa mật khẩu thất bại",Toast.LENGTH_LONG).show();
-//
-//                    }
+                    t= parseJsonChangeProfile(context,3,s,password);
                 } catch (JSONException e) {
                     e.printStackTrace();
                     Toast.makeText(context,"Sửa mật khẩu thất bại ",Toast.LENGTH_LONG).show();
@@ -249,6 +329,20 @@ public class Util {
         builder.append("&password=").append(password);
         return builder.toString();
     }
+    public String makeLoginStatement(String username,String password){
+        StringBuilder builder = new StringBuilder(Constant.LOGIN_API);
+        builder.append("&username=").append(username);
+        builder.append("&password=").append(password);
+        return builder.toString();
+    }
+    public String makeSignInStetement(String username,String password,String name,String email){
+        StringBuilder builder = new StringBuilder(Constant.SIGNIN_API);
+        builder.append("&username=").append(username);
+        builder.append("&password=").append(password);
+        builder.append("&name=").append(name);
+        builder.append("&email=").append(email);
+        return builder.toString();
+    }
     public Boolean parseJsonCheckFavorite(String json) throws JSONException {
         JSONObject response = new JSONObject(json);
         Boolean isFavorited = response.optBoolean("favorited");
@@ -260,7 +354,12 @@ public class Util {
         Boolean isFavorited = response.optBoolean("error");
         Log.d("favorite",isFavorited+"");
         return isFavorited;}
+    public String getAllSong(){
+        StringBuilder builder = new StringBuilder(Constant.GETALLSONG_API);
 
+
+        return builder.toString();
+    }
 
 
 
@@ -287,13 +386,121 @@ public class Util {
         }
         return listMusic;
     }
+    public ArrayList<ArtistMusic> parseAllHotSong(String json) throws JSONException {
+        Log.d("favorite","vafo parse json "+json);
+        ArrayList<ArtistMusic> listMusic = new ArrayList<>();
+        Constant.listHotSong.removeAll(Constant.listHotSong);
+        try{
+            JSONArray array = new JSONArray(json);
+            for(int i=0; i< array.length();i++ ){
+                JSONObject cm = array.optJSONObject(i);
+                String nameMusic = cm.optString("name");
+                String pathMusic = cm.optString("musicpath");
+                String id = cm.optString("id");
+                ArtistMusic music = new ArtistMusic(nameMusic, pathMusic,id);
+                Constant.listHotSong.add(music);
+                Log.d("favorite","name "+nameMusic);
+            }
+        }catch (JSONException e){
+            e.printStackTrace();
+        }
+        return listMusic;
+    }
+    public boolean parseJsonLogin(String json) throws JSONException {
+
+        boolean t ;
+
+        try{
+
+            JSONObject response = new JSONObject(json);
+            String error = response.optString("error");
 
 
-   public class getJson extends AsyncTask<String,String,String>{
-            @Override
+
+            switch(error){
+
+                case "true":
+
+                    String message = response.optString("message");
+                    Toast.makeText(context,message,Toast.LENGTH_LONG).show();
+                    t=false;
+
+                 break;
+                case "false":
+
+                    t=true;
+
+
+                    JSONObject userInfor = response.optJSONObject("message");
+                    String UserId = userInfor.optString("Id");
+                    String Name = userInfor.optString("Name");
+                    String UserName = userInfor.optString("UserName");
+                    String Password = userInfor.optString("Password");
+                    String Image = userInfor.optString("image");
+                    String Birthday = userInfor.optString("birthday");
+                    String Address = userInfor.optString("address");
+                    String Vip = userInfor.optString("vip");
+                    String Email = userInfor.optString("email");
+                    String Phone = userInfor.optString("phone");
+                    String Gender = userInfor.optString("gender");
+                    String Level = userInfor.optString("level");
+
+                    Constant.user = new User(UserId,Name,UserName,Password,Birthday,Address,Gender,Phone,Level,Email,Vip,Image);
+                    // databaseHelper.addUser(Constant.user);
+                    try {
+                        Constant.user = new User(UserId, Name, UserName, Password, Birthday, Address, Gender, Phone, Level, Email, Vip, Image);
+                        // databaseHelper.addUser(Constant.user);
+                        Constant.editor.putString("Id", UserId);
+                        Constant.editor.putString("Username", UserName);
+                        Constant.editor.putString("Image", Image);
+                        Constant.editor.putString("Email", Email);
+                        Constant.editor.putString("Name", Name);
+                        Constant.editor.putString("Password", Password);
+                        Constant.editor.putString("Phone", Phone);
+                        Constant.editor.commit();
+
+                    }catch (NullPointerException e){
+                        Toast.makeText(context,"Không lưu được vào Session",Toast.LENGTH_LONG).show();
+
+                    }
+
+                        break;
+
+                     default:
+
+                         t = false;
+
+                         break;
+            }
+
+
+
+
+        }catch (JSONException e){
+            e.printStackTrace();
+
+            t = false;
+
+        }
+
+        return t;
+
+    }
+
+
+
+    public class getJson extends AsyncTask<String,String,String>{
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            if(a==1)
+            dialog.show();
+        }
+
+        @Override
         protected String doInBackground(String... params) {
-            Log.d("profile","vao doInBackground "+params[0]);
-                Log.d("profile","mở urlconnection");
+            Log.d("favorite","vao doInBackground "+params[0]);
+                Log.d("favorite","mở urlconnection");
                 HttpURLConnection urlConnection = null;
 
                 BufferedReader reader = null;
@@ -302,42 +509,42 @@ public class Util {
                 String forecastJsonStr = null;
 
                 try {
-                    Log.d("profile","khai báo url "+params[0]);
+                    Log.d("favorite","khai báo url "+params[0]);
 
                     URL url = new URL(params[0]);
 
                     // Create the request to OpenWeatherMap, and open the connection
-                    Log.d("profile","tạo url connection");
+                    Log.d("favorite","tạo url connection");
 
                     urlConnection = (HttpURLConnection) url.openConnection();
-                    Log.d("profile","set request method");
+                    Log.d("favorite","set request method");
 
                     urlConnection.setRequestMethod("GET");
-                    Log.d("profile","kết nối tới url");
+                    Log.d("favorite","kết nối tới url");
 
                     urlConnection.connect();
 
                     // Read the input stream into a String
                     int status = urlConnection.getResponseCode();
-                    Log.d("profile","khởi tạo input Stream "+status);
+                    Log.d("favorite","khởi tạo input Stream "+status);
 
                     InputStream inputStream = urlConnection.getInputStream();
 
 
-                    Log.d("profile","buffer");
+                    Log.d("favorite","buffer");
 
                     StringBuffer buffer = new StringBuffer();
                     if (inputStream == null) {
-                        Log.d("profile","buffer rỗng");
+                        Log.d("favorite","buffer rỗng");
 
                         // Nothing to do.
                         return null;
                     }
                     reader = new BufferedReader(new InputStreamReader(inputStream));
-                    Log.d("profile","lấy đk reader ");
+                    Log.d("favorite","lấy đk reader ");
 
                     String line;
-                    Log.d("profile","line");
+                    Log.d("favorite","line");
 
                     while ((line = reader.readLine()) != null) {
                         buffer.append(line + "\n");
@@ -348,7 +555,7 @@ public class Util {
                         return null;
                     }
                     forecastJsonStr = buffer.toString();
-                    Log.d("mydebug",forecastJsonStr);
+                    Log.d("favorite",forecastJsonStr);
                 } catch (IOException e) {
                     Log.e("PlaceholderFragment", "Error ", e);
                     return null;

@@ -11,8 +11,11 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 
+import org.json.JSONException;
+
 import teamthat.com.onemusic.DatabaseHelper.DatabaseHelper;
 import teamthat.com.onemusic.R;
+import teamthat.com.onemusic.Util.Util;
 import teamthat.com.onemusic.model.Artist;
 import teamthat.com.onemusic.model.User;
 
@@ -37,6 +40,12 @@ public class SplashActivity extends AppCompatActivity {
         Constant.sharedPreferences = getSharedPreferences("mypref", Context.MODE_PRIVATE);
         Constant.editor = Constant.sharedPreferences.edit();
 
+        Util util = new Util(SplashActivity.this);
+        try {
+            util.getAllHotSong();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         //util.loadFavorite();
         artist = new Artist();
         if (Build.VERSION.SDK_INT >= 23) {

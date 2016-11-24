@@ -136,6 +136,8 @@ public class PlayerActivity extends AppCompatActivity {
            }else if(Constant.type==2){
             max = Constant.listfavoriteSong.size()-1;
 
+        }else if(Constant.type==3){
+            max= Constant.listHotSong.size()-1;
         }
         if(Constant.Ramdom)
             ibRamdom.setImageResource(R.drawable.ic_random_red_48dp);
@@ -249,7 +251,7 @@ public class PlayerActivity extends AppCompatActivity {
                 }else{
                     k = getIndexOfMusic(0, -1);
                 }
-
+                getSong(k);
                 getSupportActionBar().setTitle(Constant.name);
                 Log.d("mydebug", "previous " + k + " = " + Constant.path);
                 if (isServiceRunning()) {
@@ -292,7 +294,7 @@ public class PlayerActivity extends AppCompatActivity {
                 Log.d("favorite", "click onFavorite " + Constant.sharedPreferences.getString("Id", ""));
                 if (!Constant.sharedPreferences.getString("Id", "").equals("")) {
                     Log.d("favorite", "not null");
-                    Util util = new Util();
+                    Util util = new Util(PlayerActivity.this);
                     try {
                         util.changeFavoriteSong(Constant.sharedPreferences.getString("Id", ""), Constant.music_id);
                         util.getAllFavoriteSong(Constant.sharedPreferences.getString("Id", ""));
@@ -358,6 +360,9 @@ public void getSong(int k){
     }else if(Constant.type==0){
         Constant.path = Constant.listsongLocal.get(k).getMusicPath();
         Constant.name = Constant.listsongLocal.get(k).getNameMusic();
+    }else if(Constant.type==3){
+        Constant.path = Constant.listHotSong.get(k).getMusicPath();
+        Constant.name = Constant.listHotSong.get(k).getNameMusic();
     }
 }
     @Override
@@ -603,7 +608,7 @@ public void getSong(int k){
         protected void onPreExecute() {
             super.onPreExecute();
             Log.d("mydebug", "chuan bi vao");
-           // startForeground();
+            // startForeground();
 
 
         }
@@ -702,6 +707,7 @@ public void getSong(int k){
             }
 
         }
+
 
         public String Request(String Url) {
             HttpURLConnection urlConnection = null;

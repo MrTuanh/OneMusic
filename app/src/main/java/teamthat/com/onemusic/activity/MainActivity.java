@@ -24,12 +24,13 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import org.json.JSONException;
 
+import java.util.Collections;
+
 import teamthat.com.onemusic.R;
 import teamthat.com.onemusic.Util.Util;
 import teamthat.com.onemusic.fragment.HomeFragment;
 import teamthat.com.onemusic.fragment.MusicHotFragment;
 import teamthat.com.onemusic.fragment.MusicRankFragment;
-import teamthat.com.onemusic.fragment.Profile;
 import teamthat.com.onemusic.fragment.SettingsFragment;
 import teamthat.com.onemusic.model.User;
 import teamthat.com.onemusic.other.CircleTransform;
@@ -57,7 +58,6 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     private static final String TAG_ARTIST = "artist";
     private static final String TAG_MUSIC_RANK = "musicRank";
     private static final String TAG_SETTINGS = "settings";
-    private static final String TAG_PROFILE = "profile";
     public static String CURRENT_TAG = TAG_HOME;
 
     // toolbar titles respected to selected nav menu item
@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         if (Constant.sharedPreferences != null) {
         if (!Constant.sharedPreferences.getString("Id", "").equals("")) {
             try {
-                Util util = new Util();
+                Util util = new Util(this);
                 util.getAllFavoriteSong(Constant.sharedPreferences.getString("Id", ""));
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -97,9 +97,6 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         menu.findItem(R.id.nav_login).setTitle("Đăng xuất");
         else
             menu.findItem(R.id.nav_login).setTitle("Đăng nhập");
-
-
-
 
         // Navigation view header
         navHeader = navigationView.getHeaderView(0);
@@ -176,6 +173,7 @@ try {
             @Override
             public void run() {
                 // update the main content by replacing fragments
+                Collections.reverse(Constant.listHotSong);
                  fragment = getHomeFragment();
                  fragmentTransaction = getSupportFragmentManager().beginTransaction();
                 fragmentTransaction.setCustomAnimations(android.R.anim.fade_in,
@@ -220,10 +218,6 @@ try {
                 //
                 SettingsFragment settingsFragment = new SettingsFragment();
                 return settingsFragment;
-            case 5:
-                //
-                Profile profile = new Profile();
-                return profile;
             default:
                 return new HomeFragment();
         }

@@ -52,7 +52,7 @@ public class ArtistFragment extends Fragment {
     static Artist artist= null;
 
     GridView gvArtist;
-   static ArrayList<Artist> listartist;
+    static ArrayList<Artist> listartist;
     ArrayAdapter adapter;
     ArtistBaseAdapter artistAdapter;
     ProgressDialog dialog;
@@ -83,10 +83,7 @@ public class ArtistFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
       mygetallartist = new getAllArtist();
-//        if (getArguments() != null) {
-//            mParam1 = getArguments().getString(ARG_PARAM1);
-//            mParam2 = getArguments().getString(ARG_PARAM2);
-//        }
+
         final ConnectivityManager connectivityManager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         final NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
         if(networkInfo !=null){
@@ -107,8 +104,6 @@ public class ArtistFragment extends Fragment {
        artistAdapter = new ArtistBaseAdapter(getActivity(), R.layout.item_artist, listartist);
         gvArtist.setAdapter(artistAdapter);
         goToArtist();
-
-
 
         return rootview;
     }
@@ -141,14 +136,7 @@ public class ArtistFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-//        if (context instanceof OnFragmentInteractionListener) {
-//            mListener = (OnFragmentInteractionListener) context;
-//        } else {
-//            throw new RuntimeException(context.toString()
-//                    + " must implement OnFragmentInteractionListener");
-//        }
-//       dialog = ProgressDialog.show(context, "",
-//                "Loading...", true);
+
         dialog = new ProgressDialog(getActivity(),R.style.AppTheme_Dark_Dialog);
         dialog.setIndeterminate(true);
         dialog.setMessage("Loading...");

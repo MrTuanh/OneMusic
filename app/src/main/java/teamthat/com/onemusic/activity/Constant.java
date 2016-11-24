@@ -24,7 +24,12 @@ public class Constant {
     public static String CHANGEUSERNAME_API = "http://nghiahoang.net/api/appmusic/?function=updateusername";
     public static String CHANGEEMAIL_API = "http://nghiahoang.net/api/appmusic/?function=updateemail";
     public static String CHANGEPASSWORD_API = "http://nghiahoang.net/api/appmusic/?function=updatepassword";
+    public static String LOGIN_API = "http://nghiahoang.net/api/appmusic/?function=login";
+    public static String SIGNIN_API = "http://nghiahoang.net/api/appmusic/?function=signin";
+    public static String GETALLSONG_API = "http://nghiahoang.net/api/appmusic/?function=getallsongs";
+
     public static ArrayList<ArtistMusic> listfavoriteSong= new ArrayList<>();
+    public static ArrayList<ArtistMusic> listHotSong= new ArrayList<>();
 
     public  static long a;
     public  static String path;
@@ -32,7 +37,8 @@ public class Constant {
     public  static String name;
     public  static String artist_id;
     public static String artist_image;
-    public  static Artist artist;
+    public  static Artist artist=new Artist();
+
     public  static String path_music_downloading;
     public static ArrayList<String> listpath_music_downloading = new ArrayList<String>();
     public static  boolean internetConnect = false;

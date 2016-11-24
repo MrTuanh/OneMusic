@@ -1,8 +1,13 @@
 package teamthat.com.onemusic.activity;
 
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -12,6 +17,7 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,6 +36,8 @@ import java.net.URLEncoder;
 
 import teamthat.com.onemusic.DatabaseHelper.DatabaseHelper;
 import teamthat.com.onemusic.R;
+import teamthat.com.onemusic.Util.Blur;
+import teamthat.com.onemusic.Util.Util;
 import teamthat.com.onemusic.model.User;
 
 public class LoginActivity extends AppCompatActivity {
@@ -39,8 +47,11 @@ public class LoginActivity extends AppCompatActivity {
     EditText edtEmail, edtPassword;
     Button btnLogin;
     TextView tvSinup;
+    ImageView imageview;
     ProgressDialog progressDialog;
     DatabaseHelper databaseHelper;
+    BroadcastReceiver broadcastReceiver;
+    IntentFilter intentFilter;
     public static final String LOGIN_API = "http://nghiahoang.net/api/appmusic/";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +67,11 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                login();
+                try {
+                    login();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -74,12 +89,47 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
                 if (i == EditorInfo.IME_ACTION_DONE) {
-                    login();
+                    try {
+                        login();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                     return true;
                 }
                 return false;
             }
         });
+        intentFilter = new IntentFilter();
+        intentFilter.addAction("loginsucess");
+        intentFilter.addAction("loginfailure");
+        broadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                switch (intent.getAction()){
+                    case "loginsucess":
+                        Toast.makeText(getApplicationContext(),"Đăng nhập thành công ",Toast.LENGTH_SHORT).show();
+                        Intent intent1 = new Intent(getApplicationContext(), MainActivity.class);
+                        Log.d("mydebug","json image "+SplashActivity.user.getImage());
+                        startActivityForResult(intent1,1);
+                        break;
+                    case "loginfailure":
+                        onLoginFailed();
+                        break;
+                    default:
+                        onLoginFailed();
+                        break;
+                }
+
+            }
+        };
+        registerReceiver(broadcastReceiver,intentFilter);
+
+        // Blur Image
+        Blur blur = new Blur(this);
+        BitmapDrawable drawable = (BitmapDrawable) imageview.getDrawable();
+        Bitmap bitmap = drawable.getBitmap();
+        Bitmap blurred = blur.blurRenderScript(bitmap, 23 );//second parametre is radius
+        imageview.setImageBitmap(blurred);
     }
 
     private void addControl() {
@@ -87,9 +137,10 @@ public class LoginActivity extends AppCompatActivity {
         edtPassword = (EditText) findViewById(R.id.input_password);
         btnLogin = (Button) findViewById(R.id.btn_login);
         tvSinup = (TextView) findViewById(R.id.link_signup);
+        imageview = (ImageView) findViewById(R.id.img);
     }
 
-    public void login() {
+    public void login() throws JSONException {
         if (!validate()) {
             onLoginFailed();
             return;
@@ -98,15 +149,15 @@ public class LoginActivity extends AppCompatActivity {
         onLoginSuccess();
 }
 
-    public void onLoginSuccess() {
-        new connectToServer().execute();
+    public void onLoginSuccess() throws JSONException {
+        Util util = new Util(LoginActivity.this);
+       util.Login(edtEmail.getText().toString(),edtPassword.getText().toString());
         btnLogin.setEnabled(true);
-
         //finish();
     }
 
     public void onLoginFailed() {
-        Toast.makeText(getBaseContext(), "Đăng nhập thất bại !", Toast.LENGTH_LONG).show();
+
         btnLogin.setEnabled(true);
     }
 
@@ -123,7 +174,7 @@ public class LoginActivity extends AppCompatActivity {
             edtEmail.setError(null);
         }
 
-        if (password.isEmpty() || password.length() < 4) {
+        if (password.isEmpty() || password.length() <1) {
             edtPassword.setError("Mật khẩu ít nhất có 4 kí tự");
             valid = false;
         } else {
@@ -179,17 +230,28 @@ public class LoginActivity extends AppCompatActivity {
                         String Gender = userInfor.optString("gender");
                         String Level = userInfor.optString("level");
                         Log.d("mydebug","dn than cong "+Name);
-                        Constant.user = new User(UserId,Name,UserName,Password,Birthday,Address,Gender,Phone,Level,Email,Vip,Image);
-                       // databaseHelper.addUser(Constant.user);
-                        Constant.editor.putString("Id",UserId);
-                        Constant.editor.putString("Username",UserName);
-                        Constant.editor.putString("Image",Image);
-                        Constant.editor.putString("Email",Email);
-                        Constant.editor.putString("Name",Name);
-                        Constant.editor.putString("Password",Password);
-                        Constant.editor.putString("Phone",Phone);
-                        Constant.editor.commit();
-
+                        try {
+                            Constant.user = new User(UserId, Name, UserName, Password, Birthday, Address, Gender, Phone, Level, Email, Vip, Image);
+                            // databaseHelper.addUser(Constant.user);
+                            Constant.editor.putString("Id", UserId);
+                            Constant.editor.putString("Username", UserName);
+                            Constant.editor.putString("Image", Image);
+                            Constant.editor.putString("Email", Email);
+                            Constant.editor.putString("Name", Name);
+                            Constant.editor.putString("Password", Password);
+                            Constant.editor.putString("Phone", Phone);
+                            Constant.editor.commit();
+                        }catch (NullPointerException e){
+                            Constant.sharedPreferences = getSharedPreferences("mypref", Context.MODE_PRIVATE);
+                            Constant.editor.putString("Id", UserId);
+                            Constant.editor.putString("Username", UserName);
+                            Constant.editor.putString("Image", Image);
+                            Constant.editor.putString("Email", Email);
+                            Constant.editor.putString("Name", Name);
+                            Constant.editor.putString("Password", Password);
+                            Constant.editor.putString("Phone", Phone);
+                            Constant.editor.commit();
+                        }
 
                         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                         Log.d("mydebug","json image "+SplashActivity.user.getImage());

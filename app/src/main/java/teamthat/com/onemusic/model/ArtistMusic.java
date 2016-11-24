@@ -9,6 +9,7 @@ public class ArtistMusic {
     String nameMusic;
     String musicPath;
     String id;
+    String artistId;
 
     public String getId() {
         return id;
@@ -30,6 +31,21 @@ public class ArtistMusic {
         this.nameMusic = nameMusic;
         this.musicPath = musicPath;
         this.id =id;
+    }
+
+    public ArtistMusic(String nameMusic, String musicPath, String id, String artistId) {
+        this.nameMusic = nameMusic;
+        this.musicPath = musicPath;
+        this.id = id;
+        this.artistId = artistId;
+    }
+
+    public String getArtistId() {
+        return artistId;
+    }
+
+    public void setArtistId(String artistId) {
+        this.artistId = artistId;
     }
 
     public String getNameMusic() {

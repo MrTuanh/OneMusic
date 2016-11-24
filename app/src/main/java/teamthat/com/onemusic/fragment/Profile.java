@@ -218,7 +218,7 @@ public class Profile extends DialogFragment {
         }).setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Util util = new Util();
+                Util util = new Util(getActivity());
                 switch (index){
                     case 0:
 

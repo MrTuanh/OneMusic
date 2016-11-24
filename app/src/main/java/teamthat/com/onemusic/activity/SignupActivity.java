@@ -1,8 +1,13 @@
 package teamthat.com.onemusic.activity;
 
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -12,6 +17,7 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +35,8 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 
 import teamthat.com.onemusic.R;
+import teamthat.com.onemusic.Util.Blur;
+import teamthat.com.onemusic.Util.Util;
 import teamthat.com.onemusic.model.User;
 
 import static teamthat.com.onemusic.activity.LoginActivity.LOGIN_API;
@@ -38,7 +46,9 @@ public class SignupActivity extends AppCompatActivity {
     EditText edtName, edtUsername, edtEmail, edtPassword, edtReEnterPassword;
     Button btnSignup;
     TextView tvLogin;
-
+    ImageView imageview;
+    BroadcastReceiver broadcastReceiver;
+    IntentFilter intentFilter;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,6 +82,37 @@ public class SignupActivity extends AppCompatActivity {
                 return false;
             }
         });
+        intentFilter = new IntentFilter();
+        intentFilter.addAction("signinsucess");
+        intentFilter.addAction("signinfailure");
+        broadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                switch (intent.getAction()){
+                    case "signinsucess":
+                        Toast.makeText(getApplicationContext(),"Đăng ký thành công ",Toast.LENGTH_SHORT).show();
+                        Intent intent1 = new Intent(getApplicationContext(), MainActivity.class);
+                        Log.d("mydebug","json image "+SplashActivity.user.getImage());
+                        startActivityForResult(intent1,1);
+                        break;
+                    case "signinfailure":
+                        onSignupFailed();
+                        break;
+                    default:
+                        onSignupFailed();
+                        break;
+                }
+
+            }
+        };
+        registerReceiver(broadcastReceiver,intentFilter);
+
+        // Blur Image
+        Blur blur = new Blur(this);
+        BitmapDrawable drawable = (BitmapDrawable) imageview.getDrawable();
+        Bitmap bitmap = drawable.getBitmap();
+        Bitmap blurred = blur.blurRenderScript(bitmap, 23 );//second parametre is radius
+        imageview.setImageBitmap(blurred);
     }
 
     private void addControl() {
@@ -82,6 +123,7 @@ public class SignupActivity extends AppCompatActivity {
         edtReEnterPassword = (EditText) findViewById(R.id.input_reEnterPassword);
         btnSignup = (Button) findViewById(R.id.btn_signup);
         tvLogin = (TextView) findViewById(R.id.link_login);
+        imageview = (ImageView) findViewById(R.id.img);
     }
 
     public void signUp() {
@@ -104,21 +146,20 @@ public class SignupActivity extends AppCompatActivity {
         new android.os.Handler().postDelayed(
                 new Runnable() {
                     public void run() {
-                        onSignupSuccess();
+                        try {
+                            onSignupSuccess();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                         progressDialog.dismiss();
                     }
                 }, 3000);
     }
 
-    public void onSignupSuccess() {
+    public void onSignupSuccess() throws JSONException {
         btnSignup.setEnabled(true);
-        User user = new User();
-        user.setName(edtName.getText().toString());
-        user.setUsername(edtUsername.getText().toString());
-        user.setEmail(edtEmail.getText().toString());
-        user.setPassword(edtPassword.getText().toString());
-
-        new SignUp().execute(user);
+        Util util = new Util(SignupActivity.this);
+        util.SignUp(edtUsername.getText().toString(),edtPassword.getText().toString(),edtEmail.getText().toString(),edtName.getText().toString());
 
 
         setResult(RESULT_OK, null);

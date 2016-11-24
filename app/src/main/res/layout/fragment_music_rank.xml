@@ -4,11 +4,10 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <TextView
+    <ListView
+        android:id="@+id/lv_musicrank"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Music Rank"
-        android:gravity="center"/>
+        android:layout_height="match_parent"/>
 
 
 </LinearLayout>
