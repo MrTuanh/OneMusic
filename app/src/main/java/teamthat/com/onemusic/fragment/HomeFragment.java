@@ -15,7 +15,6 @@ import android.widget.Toast;
 import teamthat.com.onemusic.R;
 import teamthat.com.onemusic.activity.Constant;
 import teamthat.com.onemusic.activity.FavouriteMusicActivity;
-import teamthat.com.onemusic.activity.ListPlaylistActivity;
 import teamthat.com.onemusic.activity.LocalArtist;
 import teamthat.com.onemusic.activity.LocalMusicActivity;
 
@@ -35,7 +34,7 @@ public class HomeFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-    RelativeLayout localBanner, favbanner, profileBanner,downloadBanner,recentBanner;
+    RelativeLayout localBanner, favbanner, profileBanner,downloadBanner;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -83,7 +82,6 @@ public class HomeFragment extends Fragment {
         downloadBanner = (RelativeLayout) rootView.findViewById(R.id.downloadBanner);
         favbanner = (RelativeLayout) rootView.findViewById(R.id.favbanner);
         profileBanner = (RelativeLayout) rootView.findViewById(folderBanner);
-        recentBanner = (RelativeLayout) rootView.findViewById(R.id.recentBanner);
         intentScreen();
 
 
@@ -135,12 +133,6 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(getActivity(), LocalArtist.class));
-            }
-        });
-        recentBanner.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(getActivity(), ListPlaylistActivity.class));
             }
         });
     }

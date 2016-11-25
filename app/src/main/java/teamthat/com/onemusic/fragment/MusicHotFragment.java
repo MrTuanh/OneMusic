@@ -11,10 +11,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import teamthat.com.onemusic.R;
-import teamthat.com.onemusic.activity.AddplaylistActivity;
 import teamthat.com.onemusic.activity.Constant;
 import teamthat.com.onemusic.activity.LoginActivity;
 import teamthat.com.onemusic.activity.PlayerActivity;
@@ -70,14 +68,13 @@ public class MusicHotFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_music_hot, container, false);
-        Constant.artist = new Artist();
+        Constant.artist= new Artist();
         Constant.artist.setName("Mặc định");
-        lvMusicHot = (ListView) rootView.findViewById(R.id.lv_musichot);
-        adapter = new ArrayAdapter<ArtistMusic>(getActivity(), android.R.layout.simple_list_item_1, Constant.listHotSong);
-        lvMusicHot.setAdapter(adapter);
-        adapter.notifyDataSetChanged();
-        goToMusicHot();
-        goadd();
+            lvMusicHot = (ListView) rootView.findViewById(R.id.lv_musichot);
+            adapter = new ArrayAdapter<ArtistMusic>(getActivity(),android.R.layout.simple_list_item_1, Constant.listHotSong);
+            lvMusicHot.setAdapter(adapter);
+            adapter.notifyDataSetChanged();
+            goToMusicHot();
         return rootView;
     }
 
@@ -86,69 +83,48 @@ public class MusicHotFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Constant.name = Constant.listHotSong.get(i).getNameMusic();
-                Constant.music_id = Constant.listHotSong.get(i).getId();
-                Constant.path = LoginActivity.LOGIN_API + Constant.listHotSong.get(i).getMusicPath();
+                Constant.music_id=Constant.listHotSong.get(i).getId();
+                Constant.path = LoginActivity.LOGIN_API+Constant.listHotSong.get(i).getMusicPath();
                 Intent intent = new Intent(getActivity(), PlayerActivity.class);
-                Toast.makeText(getActivity(), String.valueOf(Constant.music_id), Toast.LENGTH_LONG).show();
-                intent.putExtra("name", true);
-                intent.putExtra("online", true);
-                intent.putExtra("type", "hotmusic");
-                Constant.type = 3;
-                Constant.index = i;
+                intent.putExtra("name",true);
+                intent.putExtra("online",true);
+                intent.putExtra("type","hotmusic");
+                Constant.type=3;
+                Constant.index=i;
                 startActivity(intent);
 
             }
         });
-
     }
 
-    public  void goadd()
-    {
-        lvMusicHot.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int i, long id) {
-                Constant.name = Constant.listHotSong.get(i).getNameMusic();
-                Constant.music_id = Constant.listHotSong.get(i).getId();
-                Constant.path = LoginActivity.LOGIN_API + Constant.listHotSong.get(i).getMusicPath();
-                Intent intent = new Intent(getActivity(), AddplaylistActivity.class);
-                Toast.makeText(getActivity(), String.valueOf(Constant.music_id), Toast.LENGTH_LONG).show();
-                intent.putExtra("id", String.valueOf(Constant.music_id));
-                Constant.type = 3;
-                Constant.index = i;
-                getActivity().startActivity(intent);
-                return false;
-            }
-        });
-    }
-
-        // TODO: Rename method, update argument and hook method into UI event
-        public void onButtonPressed (Uri uri){
-            if (mListener != null) {
-                mListener.onFragmentInteraction(uri);
-            }
+    // TODO: Rename method, update argument and hook method into UI event
+    public void onButtonPressed(Uri uri) {
+        if (mListener != null) {
+            mListener.onFragmentInteraction(uri);
         }
+    }
 
-        @Override
-        public void onAttach (Context context){
-            super.onAttach(context);
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
 //        if (context instanceof OnFragmentInteractionListener) {
 //            mListener = (OnFragmentInteractionListener) context;
 //        } else {
 //            throw new RuntimeException(context.toString()
 //                    + " must implement OnFragmentInteractionListener");
 //        }
-        }
-
-        @Override
-        public void onDetach () {
-            super.onDetach();
-            mListener = null;
-        }
-
-        public interface OnFragmentInteractionListener {
-            // TODO: Update argument type and name
-            void onFragmentInteraction(Uri uri);
-        }
-
-
     }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+    }
+
+    public interface OnFragmentInteractionListener {
+        // TODO: Update argument type and name
+        void onFragmentInteraction(Uri uri);
+    }
+
+
+}

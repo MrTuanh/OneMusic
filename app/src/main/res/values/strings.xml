@@ -45,19 +45,4 @@
     <string name="text_signup">Chưa có tài khoản? Đăng kí.</string>
     <string name="text_login">Đã là thành viên? Đăng nhập.</string>
     <string name="download">Download</string>
-    <string name="playListMusic">PlayList Nhạc</string>
-    <string-array name="countries_list">
-        <item>Chon cam xúc nhac playlist</item>
-        <item>1 *****Nhạc Vui*****</item>
-        <item>2 *****Nhạc Buồn****</item>
-        <item>3 *****Nhạc Khác*****</item>
-    </string-array>
-
-    <integer-array name="countries_flag_list">
-        <item>@drawable/ic_happy</item>
-        <item>@drawable/ic_happy</item>
-        <item>@drawable/ic_sad</item>
-        <item>@drawable/ic_angel</item>
-
-    </integer-array>
 </resources>

@@ -72,7 +72,6 @@ public class ArtistMusicActivity extends AppCompatActivity {
         new getMusicOfArtist().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,url);
 
         goToPlayerMusic();
-        goadd();
     }
 
     public String makeGetSongOfArtist(String id){
@@ -189,22 +188,6 @@ public class ArtistMusicActivity extends AppCompatActivity {
 
 
                 startActivity(intent);
-            }
-        });
-    }
-    public  void goadd()
-    {
-        lvMusic.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int i, long id) {
-                Constant.music_id = listMusic.get(i).getId();
-                Intent intent = new Intent(getApplicationContext(), AddplaylistActivity.class);
-
-                intent.putExtra("id",String.valueOf(Constant.music_id));
-
-
-                startActivity(intent);
-                return false;
             }
         });
     }
