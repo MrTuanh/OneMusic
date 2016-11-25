@@ -60,8 +60,8 @@
             android:name=".activity.FavouriteMusicActivity"
             android:label="@string/facouritelmusic" />
         <activity
-            android:name=".activity.FolderMusicActivity"
-            android:label="@string/Foldermusic" />
+            android:name=".activity.ListPlaylistActivity"
+            android:label="@string/playListMusic" />
         <activity
             android:name=".activity.LoginActivity"
             android:label="@string/login"
@@ -89,7 +89,8 @@
             android:value="@integer/google_play_services_version" />
 
         <activity android:name=".activity.Image" />
-
+<activity android:name=".activity.AddplaylistActivity"/>
+        <activity android:name=".activity.PlaylistActivity"/>
         <receiver
             android:name=".receiver.MyReceiver"
             android:enabled="true"

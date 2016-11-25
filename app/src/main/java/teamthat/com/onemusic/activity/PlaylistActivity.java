@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -21,9 +22,8 @@ import java.util.HashMap;
 
 import teamthat.com.onemusic.R;
 
-import static teamthat.com.onemusic.R.drawable.ic_sad;
 
-public class SadActivity extends AppCompatActivity {
+public class PlaylistActivity extends AppCompatActivity{
 
     JSONObject jsonobject;
     JSONArray jsonarray;
@@ -45,15 +45,13 @@ public class SadActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_playlist);
-        new SadActivity.DownloadJSON().execute();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        new DownloadJSON().execute();
         Intent i = getIntent();
         vui = i.getStringExtra("vui");
-        if(Constant.sharedPreferences.getString("Id","").equals("")){
-            Toast.makeText(SadActivity.this,"Vui lòng đăng nhập",Toast.LENGTH_LONG).show();
-            startActivity(new Intent(SadActivity.this, LoginActivity.class));
-        }
-img = (ImageView)findViewById(R.id.img1);
-            img.setImageResource(ic_sad);
+
+
+
 
     }
 
@@ -62,7 +60,7 @@ img = (ImageView)findViewById(R.id.img1);
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            mProgressDialog = new ProgressDialog(SadActivity.this);
+            mProgressDialog = new ProgressDialog(PlaylistActivity.this);
             mProgressDialog.setMessage("Loading...");
             mProgressDialog.setIndeterminate(false);
             mProgressDialog.show();
@@ -97,38 +95,55 @@ img = (ImageView)findViewById(R.id.img1);
         @Override
         protected void onPostExecute(Void args) {
             listview = (ListView) findViewById(R.id.listView);
-            adapter = new ListViewAdapter(SadActivity.this, arraylist);
+            adapter = new ListViewAdapter(PlaylistActivity.this, arraylist);
 
             listview.setAdapter(adapter);
 
 
             ArrayList<HashMap<String, String>> arrayTemplist= new ArrayList<HashMap<String,String>>();
-            String playlist = String.valueOf(3);
+            String playlist = String.valueOf(vui);
 
-            for (int i = 0; i < arraylist.size(); i++)
-            {
-                String currentString =arraylist.get(i).get(SadActivity.COUNTRY);
+            for (int i = 0; i < arraylist.size(); i++){
+                String currentString =arraylist.get(i).get(PlaylistActivity.COUNTRY);
                 if (Constant.sharedPreferences.getString("Name","").equalsIgnoreCase(currentString))
                 {
-                    String currentString2 =arraylist.get(i).get(SadActivity.PlayID);
+                    String currentString2 =arraylist.get(i).get(PlaylistActivity.PlayID);
                     if (playlist.equalsIgnoreCase(currentString2))
                     {
 
                         arrayTemplist.add(arraylist.get(i));
                     }
-
-
                 }
             }
-            adapter = new ListViewAdapter(SadActivity.this, arrayTemplist);
+            adapter = new ListViewAdapter(PlaylistActivity.this, arrayTemplist);
             listview.setAdapter(adapter);
 
             mProgressDialog.dismiss();
 
         }
-
-
-
     }
 
+
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == android.R.id.home) {
+            // finish the activity
+            onBackPressed();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        startActivity(new Intent(getApplicationContext(), MainActivity.class));
+        finish();
+        super.onBackPressed();
+    }
 }
